@@ -92,8 +92,10 @@ jobs:
 
               public static final String EXTRA_TITLE = "extra_title";
               public static final String EXTRA_SUBTITLE = "extra_subtitle";
-              public static final String EXTRA_ARTWORK = "extra_artwork";
               public static final String EXTRA_IS_PLAYING = "extra_is_playing";
+
+              // In-memory static field to transfer large artwork WITHOUT Android Binder limit!
+              public static volatile String pendingArtworkUrl = "";
 
               private MediaSessionCompat mediaSession;
               private PowerManager.WakeLock wakeLock;
@@ -167,12 +169,12 @@ jobs:
                           if (intent.hasExtra(EXTRA_TITLE)) currentTitle = intent.getStringExtra(EXTRA_TITLE);
                           if (intent.hasExtra(EXTRA_SUBTITLE)) currentSubtitle = intent.getStringExtra(EXTRA_SUBTITLE);
                           if (intent.hasExtra(EXTRA_IS_PLAYING)) isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true);
-                          if (intent.hasExtra(EXTRA_ARTWORK)) {
-                              String newArt = intent.getStringExtra(EXTRA_ARTWORK);
-                              if (newArt != null && !newArt.equals(currentArtworkUrl)) {
-                                  currentArtworkUrl = newArt;
-                                  loadArtwork(currentArtworkUrl);
-                              }
+                          
+                          // Read artwork from in-memory field to bypass Intent size limits
+                          String newArt = pendingArtworkUrl;
+                          if (newArt != null && !newArt.isEmpty() && !newArt.equals(currentArtworkUrl)) {
+                              currentArtworkUrl = newArt;
+                              loadArtwork(currentArtworkUrl);
                           }
 
                           updateMediaSessionState();
@@ -184,6 +186,7 @@ jobs:
                           isPlaying = false;
                           currentArtworkBitmap = null;
                           currentArtworkUrl = "";
+                          pendingArtworkUrl = "";
                           updateMediaSessionState();
                           try {
                               stopForeground(true);
@@ -213,11 +216,21 @@ jobs:
                       MediaMetadataCompat.Builder metaBuilder = new MediaMetadataCompat.Builder()
                           .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentTitle)
                           .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentSubtitle)
-                          .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "Radio Room");
+                          .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "Radio Room")
+                          .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, currentTitle)
+                          .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, currentSubtitle);
 
                       if (currentArtworkBitmap != null) {
                           metaBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, currentArtworkBitmap);
                           metaBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, currentArtworkBitmap);
+                          metaBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, currentArtworkBitmap);
+                      } else {
+                          try {
+                              Bitmap appBmp = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+                              metaBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, appBmp);
+                              metaBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, appBmp);
+                              metaBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, appBmp);
+                          } catch (Throwable t) {}
                       }
                       mediaSession.setMetadata(metaBuilder.build());
                   } catch (Throwable t) {}
@@ -248,8 +261,8 @@ jobs:
                                   URL url = new URL(artUrl);
                                   HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                                   connection.setDoInput(true);
-                                  connection.setConnectTimeout(5000);
-                                  connection.setReadTimeout(5000);
+                                  connection.setConnectTimeout(6000);
+                                  connection.setReadTimeout(6000);
                                   connection.connect();
                                   InputStream input = connection.getInputStream();
                                   Bitmap bmp = BitmapFactory.decodeStream(input);
@@ -457,12 +470,12 @@ jobs:
                           @JavascriptInterface
                           public void updateMedia(final String title, final String subtitle, final boolean isPlaying, final String artworkUrl) {
                               try {
+                                  MediaNotificationService.pendingArtworkUrl = (artworkUrl != null) ? artworkUrl : "";
                                   Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
                                   serviceIntent.setAction(MediaNotificationService.ACTION_UPDATE);
-                                  serviceIntent.putExtra(MediaNotificationService.EXTRA_TITLE, title);
-                                  serviceIntent.putExtra(MediaNotificationService.EXTRA_SUBTITLE, subtitle);
+                                  serviceIntent.putExtra(MediaNotificationService.EXTRA_TITLE, title != null ? title : "Radio Room");
+                                  serviceIntent.putExtra(MediaNotificationService.EXTRA_SUBTITLE, subtitle != null ? subtitle : "Live");
                                   serviceIntent.putExtra(MediaNotificationService.EXTRA_IS_PLAYING, isPlaying);
-                                  serviceIntent.putExtra(MediaNotificationService.EXTRA_ARTWORK, artworkUrl != null ? artworkUrl : "");
                                   ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
                               } catch (Throwable t) {}
                           }
@@ -470,6 +483,7 @@ jobs:
                           @JavascriptInterface
                           public void stopMedia() {
                               try {
+                                  MediaNotificationService.pendingArtworkUrl = "";
                                   Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
                                   serviceIntent.setAction(MediaNotificationService.ACTION_STOP);
                                   stopService(serviceIntent);
