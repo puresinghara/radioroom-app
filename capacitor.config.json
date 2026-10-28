@@ -1,0 +1,6 @@
+﻿{
+  "appId": "com.radioroom.app",
+  "appName": "RadioRoom",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
