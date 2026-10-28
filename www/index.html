@@ -2295,12 +2295,24 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
       nextGhostEpisode();
     } else if (event.data === YT.PlayerState.PAUSED) {
       if (!userExplicitPaused && isYtMode) {
+        // App backgrounded or minimized - aggressive auto-resume
         try { if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo(); } catch(e) {}
-        setTimeout(() => {
-          if (!userExplicitPaused && isYtMode && ytPlayer && ytPlayer.playVideo) {
-            try { ytPlayer.playVideo(); } catch(e) {}
+        [100, 300, 600, 1000, 2000].forEach(d => {
+          setTimeout(() => {
+            if (!userExplicitPaused && isYtMode && ytPlayer && ytPlayer.playVideo) {
+              try { ytPlayer.playVideo(); } catch(e) {}
+            }
+          }, d);
+        });
+        // Keep silent HTML5 audio playing to maintain Android Audio Pipeline
+        try {
+          if (audio.paused) {
+            audio.src = SILENT_WAV;
+            audio.loop = true;
+            audio.play().catch(() => {});
           }
-        }, 150);
+        } catch(e) {}
+      } else {
         setStatus('idle');
         stopProgressTracker();
       }
@@ -2793,6 +2805,28 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
     // Stalled is completely normal during live socket buffering - do not abort!
     audio.onstalled = () => {};
 
+    // HLS Background Keepalive: detect if audio truly froze and reconnect
+    if (selectedRadio.type === 'hls') {
+      let lastTime = -1;
+      let stalledSec = 0;
+      const hlsKeepalive = setInterval(() => {
+        if (token !== generation) { clearInterval(hlsKeepalive); return; }
+        if (!audio.paused && isPlaying) {
+          if (audio.currentTime === lastTime) {
+            stalledSec++;
+            if (stalledSec >= 8) { // 8 seconds frozen = reconnect
+              stalledSec = 0;
+              clearInterval(hlsKeepalive);
+              if (token === generation) { attempt = 0; connectRadio(); }
+            }
+          } else {
+            stalledSec = 0;
+            lastTime = audio.currentTime;
+          }
+        }
+      }, 1000);
+    }
+
     audio.onerror = () => {
       if (token === generation) nextSource(token);
     };
@@ -2806,9 +2840,36 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
         showError(TXT_ERR_HLS);
         return;
       }
-      hls = new Hls({ enableWorker: false, lowLatencyMode: false, maxBufferLength: 60, maxMaxBufferLength: 120 });
+      hls = new Hls({
+        enableWorker: false,
+        lowLatencyMode: false,
+        maxBufferLength: 60,
+        maxMaxBufferLength: 120,
+        maxBufferHole: 1.0,
+        highBufferWatchdogPeriod: 2,
+        nudgeMaxRetry: 10
+      });
+      let mediaRecoveryAttempts = 0;
       hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) nextSource(token);
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              mediaRecoveryAttempts++;
+              if (mediaRecoveryAttempts <= 3) {
+                hls.recoverMediaError();
+              } else {
+                mediaRecoveryAttempts = 0;
+                if (token === generation) nextSource(token);
+              }
+              break;
+            default:
+              if (token === generation) nextSource(token);
+              break;
+          }
+        }
       });
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (token === generation) { audio.play().catch(() => {}); setStatus('playing'); hideError(); }
@@ -2963,16 +3024,55 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
     return track;
   }
 
+    let coolToken = null;
+  let coolTokenExpiry = 0;
+
+  async function getCoolismToken(signal) {
+    if (coolToken && Date.now() < coolTokenExpiry) return coolToken;
+    try {
+      const res = await fetch('https://api.coolism.net/api/auth/gettoken', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic Y29vbGlzbTpQc2hqem1PUQ==',
+          'Content-Type': 'application/json'
+        },
+        signal
+      });
+      if (res.ok) {
+        const j = await res.json();
+        if (j.token) {
+          coolToken = j.token;
+          coolTokenExpiry = Date.now() + 4 * 24 * 3600 * 1000;
+          return coolToken;
+        }
+      }
+    } catch(e) {}
+    return null;
+  }
+
   async function fetchCoolism(signal) {
-    const r = await fetch('https://api.instant.audio/data/streams/96/cool', { cache: 'no-store', signal });
-    if (!r.ok) throw Error();
-    const j = await r.json();
-    const o = Array.isArray(j) ? j[0] : (j.song || j);
-    const title = o.song || o.track || o.title || 'COOLISM Live';
-    const artist = o.artist || 'COOL Fahrenheit 93';
-    let artwork = o.artwork || o.cover || '';
-    if (!artwork) artwork = await findArtwork(artist, title, signal);
-    return { title: title, artist: artist, artwork: artwork };
+    try {
+      const token = await getCoolismToken(signal);
+      if (token) {
+        const r = await fetch('https://api.coolism.net/api/song/radio/nowPlaying?type=start', {
+          headers: { 'Authorization': 'Bearer ' + token },
+          cache: 'no-store',
+          signal
+        });
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.data && j.data.nowSong) {
+            const ns = j.data.nowSong;
+            const title = (ns.song || '').trim() || 'COOLISM Live';
+            const artist = (ns.artist || '').trim() || 'COOL Fahrenheit 93';
+            let artwork = ns.thumbAlbum || '';
+            if (!artwork && artist && title) artwork = await findArtwork(artist, title, signal);
+            return { title, artist, artwork };
+          }
+        }
+      }
+    } catch(e) {}
+    return { title: 'COOL Fahrenheit 93', artist: 'COOLISM Live', artwork: '' };
   }
 
   async function fetchJazz24(signal) {
@@ -2994,34 +3094,51 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
   }
 
   function renderNowPlayingBanner(track) {
-    const banner = document.getElementById('npBanner');
-    const art = document.getElementById('npArt');
-    const song = document.getElementById('npSong');
-    const artist = document.getElementById('npArtist');
-    const currArt = document.getElementById('currArt');
-
+    if (!track) return;
     const finalArt = track.artwork || selectedRadio.logo;
-    art.src = finalArt;
-    art.onerror = () => { art.src = selectedRadio.logo; };
+    const songTitle = track.title || TXT_UNKNOWN_TRACK;
+    const songArtist = track.artist || selectedRadio.name;
+
+    const currArt = document.getElementById('currArt');
     if (currArt) {
       currArt.src = finalArt;
       currArt.onerror = () => { currArt.src = selectedRadio.logo; };
     }
 
-    song.textContent = track.title || TXT_UNKNOWN_TRACK;
-    artist.textContent = track.artist || selectedRadio.name;
-    banner.style.display = 'flex';
+    const currSub = document.getElementById('currSubtitle');
+    if (currSub) {
+      currSub.textContent = songTitle + ' - ' + songArtist;
+    }
 
-    document.getElementById('currSubtitle').textContent = track.title + ' - ' + (track.artist || selectedRadio.name);
+    const banner = document.getElementById('npBanner');
+    const art = document.getElementById('npArt');
+    const song = document.getElementById('npSong');
+    const artist = document.getElementById('npArtist');
+    if (art) {
+      art.src = finalArt;
+      art.onerror = () => { art.src = selectedRadio.logo; };
+    }
+    if (song) song.textContent = songTitle;
+    if (artist) artist.textContent = songArtist;
+    if (banner) banner.style.display = 'flex';
 
     if ('mediaSession' in navigator && window.MediaMetadata) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: track.title,
-        artist: track.artist || selectedRadio.name,
+        title: songTitle,
+        artist: songArtist,
         album: selectedRadio.name,
         artwork: [{ src: finalArt }]
       });
     }
+
+    // Push updated song title & artwork to Android notification/Control Center
+    if (window.AndroidBridge && window.AndroidBridge.updateMedia) {
+      try {
+        window.AndroidBridge.updateMedia(songTitle, songArtist, isPlaying, finalArt);
+      } catch(e) {}
+    }
+
+    syncNowPlayingSheet();
   }
 
   function updateNowPlayingInfo() {
@@ -3030,7 +3147,9 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
     const bannerEl = document.getElementById('npBanner'); if (bannerEl) bannerEl.style.display = 'none';
 
     if (isYtMode) return;
-    if (!['cool', 'eclectic24', 'indiepoprocks', 'jazz24'].includes(selectedRadio.id)) return;
+    // Stations with no API just use station logo - no need to poll
+    const stationsWithApi = ['cool', 'eclectic24', 'indiepoprocks', 'jazz24'];
+    if (!stationsWithApi.includes(selectedRadio.id)) return;
 
     const load = async () => {
       const curId = selectedRadio ? selectedRadio.id : null;
@@ -3249,9 +3368,9 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
   selectRadioStation(STATIONS[0], false);
   // YouTube background playback watchdog & visibility auto-resume
   document.addEventListener('visibilitychange', () => {
-    if (isYtMode && isPlaying && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+    if (isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') {
       setTimeout(() => {
-        if (isYtMode && isPlaying && !userExplicitPaused) {
+        if (isYtMode && !userExplicitPaused) {
           try { ytPlayer.playVideo(); } catch(e) {}
         }
       }, 100);
@@ -3259,25 +3378,39 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
   });
 
   window.addEventListener('blur', () => {
-    if (isYtMode && isPlaying && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+    if (isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') {
       setTimeout(() => {
-        if (isYtMode && isPlaying && !userExplicitPaused) {
+        if (isYtMode && !userExplicitPaused) {
           try { ytPlayer.playVideo(); } catch(e) {}
         }
       }, 100);
     }
   });
 
+  // YouTube watchdog: poll every 500ms - aggressively resume if paused by background
+  let ytWatchdogCount = 0;
   setInterval(() => {
-    if (isYtMode && isPlaying && !userExplicitPaused && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+    if (isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
       try {
         const st = ytPlayer.getPlayerState();
-        if (st === 2) { // 2 = PAUSED
+        if (st === 2 || st === 5) { // 2=PAUSED 5=CUED
           ytPlayer.playVideo();
+          ytWatchdogCount++;
+        } else if (st === 1) { // 1=PLAYING - keep silent audio alive
+          ytWatchdogCount = 0;
+          if (audio.paused && audio.src && audio.src.startsWith('data:audio/wav')) {
+            audio.play().catch(() => {});
+          }
         }
       } catch(e) {}
     }
-  }, 1000);
+    // Also keep silent WAV pinging even if YT state unknown
+    if (isYtMode && !userExplicitPaused) {
+      if (audio.paused && audio.src && audio.src.startsWith('data:audio/wav')) {
+        audio.play().catch(() => {});
+      }
+    }
+  }, 500);
 </script>
 </body>
 </html>
