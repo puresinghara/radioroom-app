@@ -514,6 +514,11 @@ jobs:
                   if (webView != null) {
                       webView.onResume();
                       webView.resumeTimers();
+                      webView.postDelayed(() -> {
+                          if (webView != null) {
+                              webView.evaluateJavascript("if (typeof isYtMode !== 'undefined' && isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') { ytPlayer.playVideo(); }", null);
+                          }
+                      }, 250);
                   }
               }
 
@@ -524,6 +529,11 @@ jobs:
                   if (webView != null) {
                       webView.onResume();
                       webView.resumeTimers();
+                      webView.postDelayed(() -> {
+                          if (webView != null) {
+                              webView.evaluateJavascript("if (typeof isYtMode !== 'undefined' && isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') { ytPlayer.playVideo(); }", null);
+                          }
+                      }, 250);
                   }
               }
 
@@ -534,6 +544,13 @@ jobs:
                   if (webView != null) {
                       webView.onResume();
                       webView.resumeTimers();
+                      if (!hasFocus) {
+                          webView.postDelayed(() -> {
+                              if (webView != null) {
+                                  webView.evaluateJavascript("if (typeof isYtMode !== 'undefined' && isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') { ytPlayer.playVideo(); }", null);
+                              }
+                          }, 250);
+                      }
                   }
               }
 
