@@ -2086,6 +2086,29 @@ const GHOST_EPISODES = [
   let hls = null;
   let generation = 0;
   let isPlaying = false;
+  let userExplicitPaused = false;
+
+  // Background & Visibility Spoofing
+  try {
+    Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
+    Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
+  } catch(e) {}
+  window.addEventListener('visibilitychange', (e) => e.stopImmediatePropagation(), true);
+  document.addEventListener('visibilitychange', (e) => e.stopImmediatePropagation(), true);
+  window.addEventListener('blur', (e) => e.stopImmediatePropagation(), true);
+
+  window.togglePlayPause = function() {
+    const btn = document.getElementById('playBtn');
+    if (btn) btn.click();
+  };
+  window.nextTrack = function() {
+    const btn = document.getElementById('nextBtn');
+    if (btn) btn.click();
+  };
+  window.prevTrack = function() {
+    const btn = document.getElementById('prevBtn');
+    if (btn) btn.click();
+  };
   let timeout = null;
   let attempt = 0;
   let reconnectTimer = null;
