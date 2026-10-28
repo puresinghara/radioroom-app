@@ -2326,10 +2326,10 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
 
       // Update Now Playing banner
       const banner = document.getElementById('npBanner');
-      document.getElementById('npArt').src = GHOST_LOGO;
-      document.getElementById('npSong').textContent = title;
-      document.getElementById('npArtist').textContent = author + ' - The Ghost Radio';
-      banner.style.display = 'flex';
+      const npArt = document.getElementById('npArt'); if (npArt) npArt.src = GHOST_LOGO;
+      const npSong = document.getElementById('npSong'); if (npSong) npSong.textContent = title;
+      const npArtst = document.getElementById('npArtist'); if (npArtst) npArtst.textContent = author + ' - The Ghost Radio';
+      if (banner) banner.style.display = 'flex';
 
       if ('mediaSession' in navigator && window.MediaMetadata) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -2510,14 +2510,14 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
   }
 
   function initGreeting() {
+    const el = document.getElementById('greeting'); if (!el) return;
     const hour = new Date().getHours();
     let text = TXT_GREET_NIGHT;
     if (hour >= 5 && hour < 12) text = TXT_GREET_MORNING;
     else if (hour >= 12 && hour < 17) text = TXT_GREET_AFTERNOON;
     else if (hour >= 17 && hour < 21) text = TXT_GREET_EVENING;
-    document.getElementById('greeting').textContent = text + ' - Radio Room';
+    el.textContent = text + ' - Radio Room';
   }
-
   function createStationCard(s) {
     const card = document.createElement('div');
     card.className = 'station-card' + (s.id === selectedRadio.id && !isYtMode ? ' active' : '') + (s.id === selectedRadio.id && isPlaying && !isYtMode ? ' playing' : '');
@@ -3027,7 +3027,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
   function updateNowPlayingInfo() {
     clearInterval(npTimer);
     if (npAbort) npAbort.abort();
-    document.getElementById('npBanner').style.display = 'none';
+    const bannerEl = document.getElementById('npBanner'); if (bannerEl) bannerEl.style.display = 'none';
 
     if (isYtMode) return;
     if (!['cool', 'eclectic24', 'indiepoprocks', 'jazz24'].includes(selectedRadio.id)) return;
