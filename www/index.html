@@ -2079,7 +2079,13 @@ const GHOST_EPISODES = [
   let userExplicitPaused = false;
 const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 
-  // Background & Visibility Spoofing
+  // Desktop User-Agent & Visibility Spoofing (Brave Browser technique)
+  try {
+    Object.defineProperty(navigator, 'userAgent', {
+      get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+      configurable: true
+    });
+  } catch(e) {}
   try {
     Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
     Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
@@ -2823,27 +2829,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
     // Stalled is completely normal during live socket buffering - do not abort!
     audio.onstalled = () => {};
 
-    // HLS Background Keepalive: detect if audio truly froze and reconnect
-    if (selectedRadio.type === 'hls') {
-      let lastTime = -1;
-      let stalledSec = 0;
-      const hlsKeepalive = setInterval(() => {
-        if (token !== generation) { clearInterval(hlsKeepalive); return; }
-        if (!audio.paused && isPlaying) {
-          if (audio.currentTime === lastTime) {
-            stalledSec++;
-            if (stalledSec >= 8) { // 8 seconds frozen = reconnect
-              stalledSec = 0;
-              clearInterval(hlsKeepalive);
-              if (token === generation) { attempt = 0; connectRadio(); }
-            }
-          } else {
-            stalledSec = 0;
-            lastTime = audio.currentTime;
-          }
-        }
-      }, 1000);
-    }
+    // HLS keepalive removed - browser handles buffering naturally
 
     audio.onerror = () => {
       if (token === generation) nextSource(token);
