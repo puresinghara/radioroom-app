@@ -63,6 +63,7 @@ jobs:
           import android.os.PowerManager;
           import androidx.core.app.NotificationCompat;
           import androidx.media.app.NotificationCompat.MediaStyle;
+          import com.radioroom.app.R;
 
           public class MediaNotificationService extends Service {
               private static final String CHANNEL_ID = "radioroom_playback_channel";
@@ -95,7 +96,7 @@ jobs:
                           wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RadioRoom:AudioWakeLock");
                           wakeLock.acquire(24 * 60 * 60 * 1000L);
                       }
-                  } catch (Exception e) {}
+                  } catch (Throwable t) {}
               }
 
               @Override
@@ -110,12 +111,12 @@ jobs:
                           try {
                               Notification notification = buildNotification();
                               startForeground(NOTIFICATION_ID, notification);
-                          } catch (Exception e) {}
+                          } catch (Throwable t) {}
                       } else if (ACTION_STOP.equals(action)) {
                           try {
                               stopForeground(true);
                               stopSelf();
-                          } catch (Exception e) {}
+                          } catch (Throwable t) {}
                       }
                   }
                   return START_STICKY;
@@ -173,7 +174,7 @@ jobs:
                       channel.setShowBadge(false);
                       channel.setSound(null, null);
                       channel.enableVibration(false);
-                      NotificationManager nm = getSystemService(NotificationManager.class);
+                      NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                       if (nm != null) {
                           nm.createNotificationChannel(channel);
                       }
@@ -186,7 +187,7 @@ jobs:
                       if (wakeLock != null && wakeLock.isHeld()) {
                           wakeLock.release();
                       }
-                  } catch (Exception e) {}
+                  } catch (Throwable t) {}
                   super.onDestroy();
               }
 
@@ -257,25 +258,24 @@ jobs:
               }
 
               @Override
-              protected void onCreate(Bundle savedInstanceState) {
+              public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
 
-                  // Keep normal status bar (NOT fullscreen)
-                  // Request Notification Permission on Android 13+
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                      if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                          requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
-                      }
+                  if (Build.VERSION.SDK_INT >= 33) {
+                      try {
+                          if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                              requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+                          }
+                      } catch (Throwable t) {}
                   }
 
-                  // Acquire WakeLock
                   try {
                       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
                       if (pm != null) {
                           wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RadioRoom:KeepAlive");
                           wakeLock.acquire();
                       }
-                  } catch (Exception e) {}
+                  } catch (Throwable t) {}
 
                   WebView webView = this.bridge.getWebView();
                   staticWebView = webView;
@@ -283,7 +283,6 @@ jobs:
                   if (webView != null) {
                       WebSettings settings = webView.getSettings();
                       settings.setMediaPlaybackRequiresUserGesture(false);
-                      // Allow mixed content so http:// audio streams can play inside the app!
                       settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
                       settings.setDomStorageEnabled(true);
                       settings.setDatabaseEnabled(true);
@@ -298,7 +297,7 @@ jobs:
                                   serviceIntent.putExtra(MediaNotificationService.EXTRA_SUBTITLE, subtitle);
                                   serviceIntent.putExtra(MediaNotificationService.EXTRA_IS_PLAYING, isPlaying);
                                   ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
-                              } catch (Exception e) {}
+                              } catch (Throwable t) {}
                           }
 
                           @JavascriptInterface
@@ -307,7 +306,7 @@ jobs:
                                   Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
                                   serviceIntent.setAction(MediaNotificationService.ACTION_STOP);
                                   stopService(serviceIntent);
-                              } catch (Exception e) {}
+                              } catch (Throwable t) {}
                           }
                       }, "AndroidBridge");
                   }
@@ -332,12 +331,12 @@ jobs:
               }
 
               @Override
-              protected void onDestroy() {
+              public void onDestroy() {
                   try {
                       if (wakeLock != null && wakeLock.isHeld()) {
                           wakeLock.release();
                       }
-                  } catch (Exception e) {}
+                  } catch (Throwable t) {}
                   super.onDestroy();
               }
           }
@@ -345,7 +344,6 @@ jobs:
 
       - name: Inject Custom User App Logo
         run: |
-          # Remove adaptive-icon XML folder so Android uses our launcher icons directly
           rm -rf android/app/src/main/res/mipmap-anydpi-v26 || true
           
           python3 - << 'PYEOF'
@@ -364,7 +362,7 @@ jobs:
                   f_out.write(rd_bytes)
               with open(os.path.join(dir_path, 'ic_launcher_foreground.png'), 'wb') as f_out:
                   f_out.write(sq_bytes)
-          print("User custom app icons installed to all mipmap directories successfully!")
+          print("User custom app icons installed successfully!")
           PYEOF
 
       - name: Sync Capacitor Android
