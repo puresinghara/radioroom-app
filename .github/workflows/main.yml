@@ -538,28 +538,28 @@ jobs:
       - name: Generate Custom Launcher Icons
         run: |
           pip install pillow --break-system-packages || pip install pillow || true
-          cat << 'PYEOF' > generate_icons.py
-import os
-from PIL import Image
+          cat << 'PYEOF' | sed 's/^[ ]\{10\}//' > generate_icons.py
+          import os
+          from PIL import Image
 
-if os.path.exists('app_logo.png'):
-    img = Image.open('app_logo.png').convert('RGBA')
-    sizes = {
-        'mipmap-mdpi': 48,
-        'mipmap-hdpi': 72,
-        'mipmap-xhdpi': 96,
-        'mipmap-xxhdpi': 144,
-        'mipmap-xxxhdpi': 192
-    }
-    for folder, size in sizes.items():
-        dir_path = os.path.join('android/app/src/main/res', folder)
-        os.makedirs(dir_path, exist_ok=True)
-        resized = img.resize((size, size), Image.Resampling.LANCZOS)
-        resized.save(os.path.join(dir_path, 'ic_launcher.png'), 'PNG')
-        resized.save(os.path.join(dir_path, 'ic_launcher_round.png'), 'PNG')
-        resized.save(os.path.join(dir_path, 'ic_launcher_foreground.png'), 'PNG')
-    print('User launcher icons generated for all mipmap buckets successfully!')
-PYEOF
+          if os.path.exists('app_logo.png'):
+              img = Image.open('app_logo.png').convert('RGBA')
+              sizes = {
+                  'mipmap-mdpi': 48,
+                  'mipmap-hdpi': 72,
+                  'mipmap-xhdpi': 96,
+                  'mipmap-xxhdpi': 144,
+                  'mipmap-xxxhdpi': 192
+              }
+              for folder, size in sizes.items():
+                  dir_path = os.path.join('android/app/src/main/res', folder)
+                  os.makedirs(dir_path, exist_ok=True)
+                  resized = img.resize((size, size), Image.Resampling.LANCZOS)
+                  resized.save(os.path.join(dir_path, 'ic_launcher.png'), 'PNG')
+                  resized.save(os.path.join(dir_path, 'ic_launcher_round.png'), 'PNG')
+                  resized.save(os.path.join(dir_path, 'ic_launcher_foreground.png'), 'PNG')
+              print('User launcher icons generated for all mipmap buckets successfully!')
+          PYEOF
           python3 generate_icons.py || true
           rm -rf android/app/src/main/res/mipmap-anydpi-v26 || true
 
