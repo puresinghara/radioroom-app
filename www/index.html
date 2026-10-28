@@ -2690,9 +2690,11 @@ const GHOST_EPISODES = [
     }
     if (window.AndroidBridge && window.AndroidBridge.updateMedia) {
       try {
-        const t = document.getElementById('currTitle') ? document.getElementById('currTitle').textContent : 'RadioRoom';
+        const t = document.getElementById('currTitle') ? document.getElementById('currTitle').textContent : 'Radio Room';
         const s = document.getElementById('currSubtitle') ? document.getElementById('currSubtitle').textContent : 'Live';
-        window.AndroidBridge.updateMedia(t, s, isPlaying);
+        const artEl = document.getElementById('currArt');
+        const art = artEl ? artEl.src : '';
+        window.AndroidBridge.updateMedia(t, s, isPlaying, art);
       } catch(e) {}
     }
   }
