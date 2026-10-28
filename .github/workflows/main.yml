@@ -31,31 +31,341 @@ jobs:
       - name: Add Android Platform
         run: npx cap add android
 
-      - name: Configure Background Audio & Permissions
+      - name: Add Media Support Library to build.gradle
         run: |
-          # Add permissions for background playback, network, and wake lock
+          sed -i '/dependencies {/a \    implementation "androidx.media:media:1.7.0"' android/app/build.gradle
+
+      - name: Configure Android Permissions & Service in AndroidManifest.xml
+        run: |
+          # Permissions
           sed -i '/android.permission.INTERNET/a \    <uses-permission android:name="android.permission.WAKE_LOCK" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />' android/app/src/main/AndroidManifest.xml
           
-          # Patch MainActivity to keep WebView running in background
-          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/MainActivity.java
-          package com.radioroom.app;
-          import android.os.Bundle;
-          import android.webkit.WebView;
-          import com.getcapacitor.BridgeActivity;
+          # Service & Receiver declarations inside <application>
+          sed -i '/<\/application>/i \    <service android:name="com.radioroom.app.MediaNotificationService" android:enabled="true" android:exported="false" android:foregroundServiceType="mediaPlayback" />\n    <receiver android:name="com.radioroom.app.MediaActionReceiver" android:enabled="true" android:exported="false" />' android/app/src/main/AndroidManifest.xml
 
-          public class MainActivity extends BridgeActivity {
+      - name: Configure Fullscreen Theme in styles.xml
+        run: |
+          cat << 'EOF' > android/app/src/main/res/values/styles.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+                  <item name="android:windowNoTitle">true</item>
+                  <item name="android:windowActionBar">false</item>
+                  <item name="android:windowFullscreen">true</item>
+                  <item name="android:windowContentOverlay">@null</item>
+              </style>
+              <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+                  <item name="android:windowFullscreen">true</item>
+                  <item name="android:windowContentOverlay">@null</item>
+              </style>
+              <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
+                  <item name="android:background">#121212</item>
+              </style>
+          </resources>
+          EOF
+
+      - name: Create Native Media Notification Service
+        run: |
+          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/MediaNotificationService.java
+          package com.radioroom.app;
+
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.app.PendingIntent;
+          import android.app.Service;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.os.Build;
+          import android.os.IBinder;
+          import android.os.PowerManager;
+          import androidx.core.app.NotificationCompat;
+          import androidx.media.app.NotificationCompat.MediaStyle;
+
+          public class MediaNotificationService extends Service {
+              private static final String CHANNEL_ID = "radioroom_playback_channel";
+              private static final int NOTIFICATION_ID = 1001;
+              
+              public static final String ACTION_START = "com.radioroom.app.START";
+              public static final String ACTION_UPDATE = "com.radioroom.app.UPDATE";
+              public static final String ACTION_STOP = "com.radioroom.app.STOP";
+              
+              public static final String ACTION_PLAY_PAUSE = "com.radioroom.app.PLAY_PAUSE";
+              public static final String ACTION_PREV = "com.radioroom.app.PREV";
+              public static final String ACTION_NEXT = "com.radioroom.app.NEXT";
+
+              public static final String EXTRA_TITLE = "extra_title";
+              public static final String EXTRA_SUBTITLE = "extra_subtitle";
+              public static final String EXTRA_IS_PLAYING = "extra_is_playing";
+
+              private PowerManager.WakeLock wakeLock;
+              private String currentTitle = "RadioRoom";
+              private String currentSubtitle = "Live Stream";
+              private boolean isPlaying = false;
+
               @Override
-              public void onPause() {
-                  super.onPause();
-                  try {
-                      WebView webView = this.bridge.getWebView();
-                      if (webView != null) {
-                          webView.onResume();
+              public void onCreate() {
+                  super.onCreate();
+                  createNotificationChannel();
+                  PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                  if (pm != null) {
+                      wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RadioRoom:AudioWakeLock");
+                      wakeLock.acquire(24 * 60 * 60 * 1000L);
+                  }
+              }
+
+              @Override
+              public int onStartCommand(Intent intent, int flags, int startId) {
+                  if (intent != null) {
+                      String action = intent.getAction();
+                      if (ACTION_START.equals(action) || ACTION_UPDATE.equals(action)) {
+                          if (intent.hasExtra(EXTRA_TITLE)) currentTitle = intent.getStringExtra(EXTRA_TITLE);
+                          if (intent.hasExtra(EXTRA_SUBTITLE)) currentSubtitle = intent.getStringExtra(EXTRA_SUBTITLE);
+                          if (intent.hasExtra(EXTRA_IS_PLAYING)) isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true);
+                          
+                          Notification notification = buildNotification();
+                          startForeground(NOTIFICATION_ID, notification);
+                      } else if (ACTION_STOP.equals(action)) {
+                          stopForeground(true);
+                          stopSelf();
                       }
-                  } catch (Exception e) {}
+                  }
+                  return START_STICKY;
+              }
+
+              private Notification buildNotification() {
+                  Intent openAppIntent = new Intent(this, MainActivity.class);
+                  openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                  PendingIntent contentPendingIntent = PendingIntent.getActivity(
+                      this, 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                  );
+
+                  PendingIntent prevPendingIntent = PendingIntent.getBroadcast(
+                      this, 1, new Intent(this, MediaActionReceiver.class).setAction(ACTION_PREV),
+                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                  );
+
+                  PendingIntent playPausePendingIntent = PendingIntent.getBroadcast(
+                      this, 2, new Intent(this, MediaActionReceiver.class).setAction(ACTION_PLAY_PAUSE),
+                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                  );
+
+                  PendingIntent nextPendingIntent = PendingIntent.getBroadcast(
+                      this, 3, new Intent(this, MediaActionReceiver.class).setAction(ACTION_NEXT),
+                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                  );
+
+                  int playPauseIcon = isPlaying ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play;
+                  String playPauseTitle = isPlaying ? "Pause" : "Play";
+
+                  NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                      .setSmallIcon(R.mipmap.ic_launcher)
+                      .setContentTitle(currentTitle != null ? currentTitle : "RadioRoom")
+                      .setContentText(currentSubtitle != null ? currentSubtitle : "Now Playing")
+                      .setContentIntent(contentPendingIntent)
+                      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                      .setOngoing(isPlaying)
+                      .setPriority(NotificationCompat.PRIORITY_LOW)
+                      .addAction(android.R.drawable.ic_media_previous, "Previous", prevPendingIntent)
+                      .addAction(playPauseIcon, playPauseTitle, playPausePendingIntent)
+                      .addAction(android.R.drawable.ic_media_next, "Next", nextPendingIntent)
+                      .setStyle(new MediaStyle().setShowActionsInCompactView(0, 1, 2));
+
+                  return builder.build();
+              }
+
+              private void createNotificationChannel() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                      NotificationChannel channel = new NotificationChannel(
+                          CHANNEL_ID,
+                          "RadioRoom Audio Playback",
+                          NotificationManager.IMPORTANCE_LOW
+                      );
+                      channel.setDescription("Control audio playback in notification panel & lock screen");
+                      channel.setShowBadge(false);
+                      channel.setSound(null, null);
+                      channel.enableVibration(false);
+                      NotificationManager nm = getSystemService(NotificationManager.class);
+                      if (nm != null) {
+                          nm.createNotificationChannel(channel);
+                      }
+                  }
+              }
+
+              @Override
+              public void onDestroy() {
+                  if (wakeLock != null && wakeLock.isHeld()) {
+                      wakeLock.release();
+                  }
+                  super.onDestroy();
+              }
+
+              @Override
+              public IBinder onBind(Intent intent) {
+                  return null;
               }
           }
           EOF
+
+      - name: Create Native Media Action Receiver
+        run: |
+          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/MediaActionReceiver.java
+          package com.radioroom.app;
+
+          import android.content.BroadcastReceiver;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.webkit.WebView;
+
+          public class MediaActionReceiver extends BroadcastReceiver {
+              @Override
+              public void onReceive(Context context, Intent intent) {
+                  if (intent == null) return;
+                  String action = intent.getAction();
+                  WebView webView = MainActivity.getAppWebView();
+                  if (webView == null) return;
+
+                  if (MediaNotificationService.ACTION_PLAY_PAUSE.equals(action)) {
+                      webView.post(() -> webView.evaluateJavascript(
+                          "if (typeof togglePlayPause === 'function') togglePlayPause(); else document.getElementById('playBtn').click();", null
+                      ));
+                  } else if (MediaNotificationService.ACTION_NEXT.equals(action)) {
+                      webView.post(() -> webView.evaluateJavascript(
+                          "if (typeof nextTrack === 'function') nextTrack(); else document.getElementById('nextBtn').click();", null
+                      ));
+                  } else if (MediaNotificationService.ACTION_PREV.equals(action)) {
+                      webView.post(() -> webView.evaluateJavascript(
+                          "if (typeof prevTrack === 'function') prevTrack(); else document.getElementById('prevBtn').click();", null
+                      ));
+                  }
+              }
+          }
+          EOF
+
+      - name: Patch MainActivity with Fullscreen & Background Audio Bridge
+        run: |
+          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/MainActivity.java
+          package com.radioroom.app;
+
+          import android.content.Intent;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.WindowManager;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import androidx.core.content.ContextCompat;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              private static WebView staticWebView;
+
+              public static WebView getAppWebView() {
+                  return staticWebView;
+              }
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  applyFullscreen();
+
+                  WebView webView = this.bridge.getWebView();
+                  staticWebView = webView;
+
+                  if (webView != null) {
+                      WebSettings settings = webView.getSettings();
+                      settings.setMediaPlaybackRequiresUserGesture(false);
+
+                      webView.addJavascriptInterface(new Object() {
+                          @JavascriptInterface
+                          public void updateMedia(final String title, final String subtitle, final boolean isPlaying) {
+                              Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
+                              serviceIntent.setAction(MediaNotificationService.ACTION_UPDATE);
+                              serviceIntent.putExtra(MediaNotificationService.EXTRA_TITLE, title);
+                              serviceIntent.putExtra(MediaNotificationService.EXTRA_SUBTITLE, subtitle);
+                              serviceIntent.putExtra(MediaNotificationService.EXTRA_IS_PLAYING, isPlaying);
+                              try {
+                                  ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
+                              } catch (Exception e) {}
+                          }
+
+                          @JavascriptInterface
+                          public void stopMedia() {
+                              Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
+                              serviceIntent.setAction(MediaNotificationService.ACTION_STOP);
+                              stopService(serviceIntent);
+                          }
+                      }, "AndroidBridge");
+                  }
+              }
+
+              private void applyFullscreen() {
+                  try {
+                      getWindow().setFlags(
+                          WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                          WindowManager.LayoutParams.FLAG_FULLSCREEN
+                      );
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                          getWindow().getAttributes().layoutInDisplayCutoutMode =
+                              WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                      }
+                      getWindow().getDecorView().setSystemUiVisibility(
+                          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                          | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                          | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                          | View.SYSTEM_UI_FLAG_FULLSCREEN
+                          | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                      );
+                  } catch (Exception e) {}
+              }
+
+              @Override
+              public void onWindowFocusChanged(boolean hasFocus) {
+                  super.onWindowFocusChanged(hasFocus);
+                  if (hasFocus) {
+                      applyFullscreen();
+                  }
+              }
+
+              @Override
+              public void onPause() {
+                  super.onPause();
+                  WebView webView = this.bridge.getWebView();
+                  if (webView != null) {
+                      webView.onResume();
+                  }
+              }
+
+              @Override
+              public void onStop() {
+                  super.onStop();
+                  WebView webView = this.bridge.getWebView();
+                  if (webView != null) {
+                      webView.onResume();
+                  }
+              }
+          }
+          EOF
+
+      - name: Inject Custom App Icons
+        run: |
+          python3 - << 'PYEOF'
+          import base64, os
+          sq_b64 = "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"
+          rd_b64 = "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"
+          sq_bytes = base64.b64decode(sq_b64)
+          rd_bytes = base64.b64decode(rd_b64)
+          folders = ['mipmap-mdpi', 'mipmap-hdpi', 'mipmap-xhdpi', 'mipmap-xxhdpi', 'mipmap-xxxhdpi']
+          for f in folders:
+              dir_path = os.path.join('android/app/src/main/res', f)
+              os.makedirs(dir_path, exist_ok=True)
+              with open(os.path.join(dir_path, 'ic_launcher.png'), 'wb') as f_out:
+                  f_out.write(sq_bytes)
+              with open(os.path.join(dir_path, 'ic_launcher_round.png'), 'wb') as f_out:
+                  f_out.write(rd_bytes)
+          print("App icons installed to all mipmap directories successfully!")
+          PYEOF
 
       - name: Sync Capacitor Android
         run: npx cap sync android
