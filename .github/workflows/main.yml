@@ -1,0 +1,76 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Native Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Configure Background Audio & Permissions
+        run: |
+          # Add permissions for background playback, network, and wake lock
+          sed -i '/android.permission.INTERNET/a \    <uses-permission android:name="android.permission.WAKE_LOCK" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />' android/app/src/main/AndroidManifest.xml
+          
+          # Patch MainActivity to keep WebView running in background
+          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/MainActivity.java
+          package com.radioroom.app;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onPause() {
+                  super.onPause();
+                  try {
+                      WebView webView = this.bridge.getWebView();
+                      if (webView != null) {
+                          webView.onResume();
+                      }
+                  } catch (Exception e) {}
+              }
+          }
+          EOF
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Build Debug APK with Gradle
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RadioRoom-Release-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
