@@ -2248,8 +2248,16 @@ const GHOST_EPISODES = [
       stopProgressTracker();
       nextGhostEpisode();
     } else if (event.data === YT.PlayerState.PAUSED) {
-      setStatus('idle');
-      stopProgressTracker();
+      if (!userExplicitPaused && isYtMode) {
+        setTimeout(() => {
+          if (!userExplicitPaused && isYtMode && ytPlayer && ytPlayer.playVideo) {
+            try { ytPlayer.playVideo(); } catch(e) {}
+          }
+        }, 120);
+      } else {
+        setStatus('idle');
+        stopProgressTracker();
+      }
     } else if (event.data === YT.PlayerState.BUFFERING) {
       setStatus('loading', TXT_BUFFERING);
     }
@@ -2625,6 +2633,13 @@ const GHOST_EPISODES = [
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
     }
+    if (window.AndroidBridge && window.AndroidBridge.updateMedia) {
+      try {
+        const t = document.getElementById('currTitle') ? document.getElementById('currTitle').textContent : 'RadioRoom';
+        const s = document.getElementById('currSubtitle') ? document.getElementById('currSubtitle').textContent : 'Live';
+        window.AndroidBridge.updateMedia(t, s, isPlaying);
+      } catch(e) {}
+    }
   }
 
   function cleanup() {
@@ -2651,6 +2666,7 @@ const GHOST_EPISODES = [
   }
 
   function stopAudio() {
+    userExplicitPaused = true;
     cleanup();
     setStatus('idle');
   }
@@ -2762,6 +2778,7 @@ const GHOST_EPISODES = [
   }
 
   function startAudio() {
+    userExplicitPaused = false;
     if (isYtMode) {
       if (ytReady && ytPlayer && ytPlayer.playVideo) {
         try { ytPlayer.playVideo(); } catch { playGhostEpisode(currentGhostEpisode); }
