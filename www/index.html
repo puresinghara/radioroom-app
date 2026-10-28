@@ -2114,6 +2114,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
   let ytPlayer = null;
   let ytReady = false;
   let isYtMode = false;
+  let currentTrackInfo = null;
 
   // YouTube Playback Duration & Progress
   let progressInterval = null;
@@ -2758,6 +2759,23 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
     document.getElementById('alertBox').style.display = 'none';
   }
 
+  class AudioOnlyPlaylistLoader extends (window.Hls && Hls.DefaultConfig ? Hls.DefaultConfig.loader : Object) {
+    load(context, config, callbacks) {
+      const origOnSuccess = callbacks.onSuccess;
+      callbacks.onSuccess = (response, stats, ctx, networkDetails) => {
+        if ((ctx.type === 'manifest' || ctx.type === 'level') && typeof response.data === 'string') {
+          let m3u8 = response.data;
+          // Strip out avc1 video codec and resolution so Hls.js treats Cat Radio strictly as PURE AUDIO
+          m3u8 = m3u8.replace(/CODECS="[^"]*avc1[^",]*,?/gi, 'CODECS="');
+          m3u8 = m3u8.replace(/,RESOLUTION=[0-9x]+/gi, '');
+          response.data = m3u8;
+        }
+        origOnSuccess(response, stats, ctx, networkDetails);
+      };
+      super.load(context, config, callbacks);
+    }
+  }
+
   function connectRadio() {
     cleanup();
     hideError();
@@ -2925,6 +2943,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
     isYtMode = false;
     try { audio.loop = false; } catch(e) {}
     selectedRadio = s;
+    currentTrackInfo = null;
     hideError();
     
     if (s.color) {
@@ -3095,6 +3114,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
 
   function renderNowPlayingBanner(track) {
     if (!track) return;
+    currentTrackInfo = track;
     const finalArt = track.artwork || selectedRadio.logo;
     const songTitle = track.title || TXT_UNKNOWN_TRACK;
     const songArtist = track.artist || selectedRadio.name;
@@ -3264,13 +3284,17 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
       if (sProgWrap) sProgWrap.style.display = 'block';
     } else {
       if (sHeadTitle) sHeadTitle.textContent = selectedRadio.group === 'Thai' ? '\u0E27\u0E34\u0E17\u0E22\u0E38\u0E44\u0E17\u0E22' : '\u0E27\u0E34\u0E17\u0E22\u0E38\u0E2A\u0E32\u0E01\u0E25';
+      
       const currArt = document.getElementById('currArt');
-      if (sArt) sArt.src = (currArt && currArt.src) ? currArt.src : selectedRadio.logo;
-      const npSong = document.getElementById('npSong');
-      const npArtist = document.getElementById('npArtist');
-      if (npSong && npSong.textContent && npSong.textContent !== '\u0E44\u0E21\u0E48\u0E17\u0E23\u0E32\u0E1A\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E14\u0E25\u0E07' && npSong.textContent !== '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2A\u0E16\u0E32\u0E19\u0E35\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23') {
-        if (sTitle) sTitle.textContent = npSong.textContent;
-        if (sSubtitle) sSubtitle.textContent = (npArtist ? npArtist.textContent : selectedRadio.name);
+      const finalArt = (currentTrackInfo && currentTrackInfo.artwork) ? currentTrackInfo.artwork : ((currArt && currArt.src) ? currArt.src : selectedRadio.logo);
+      if (sArt) {
+        sArt.src = finalArt;
+        sArt.onerror = () => { sArt.src = selectedRadio.logo; };
+      }
+
+      if (currentTrackInfo && currentTrackInfo.title) {
+        if (sTitle) sTitle.textContent = currentTrackInfo.title;
+        if (sSubtitle) sSubtitle.textContent = currentTrackInfo.artist || selectedRadio.name;
       } else {
         if (sTitle) sTitle.textContent = selectedRadio.name;
         if (sSubtitle) sSubtitle.textContent = selectedRadio.tagline || (selectedRadio.group === 'Thai' ? TXT_STATION_THAI : TXT_STATION_GLOBAL);
