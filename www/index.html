@@ -2295,12 +2295,12 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
       nextGhostEpisode();
     } else if (event.data === YT.PlayerState.PAUSED) {
       if (!userExplicitPaused && isYtMode) {
+        try { if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo(); } catch(e) {}
         setTimeout(() => {
           if (!userExplicitPaused && isYtMode && ytPlayer && ytPlayer.playVideo) {
             try { ytPlayer.playVideo(); } catch(e) {}
           }
-        }, 120);
-      } else {
+        }, 150);
         setStatus('idle');
         stopProgressTracker();
       }
@@ -2657,12 +2657,12 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
       dot.classList.add('loading');
       text.textContent = msg || TXT_LOADING;
       playIcon.innerHTML = pauseSvg;
-      if (sheetIcon) sheetIcon.innerHTML = pauseSvg;
+      isPlaying = true;
     } else if (state === 'reconnecting') {
       dot.classList.add('loading');
       text.textContent = msg || TXT_RECONNECTING;
       playIcon.innerHTML = pauseSvg;
-      if (sheetIcon) sheetIcon.innerHTML = pauseSvg;
+      isPlaying = true;
     } else {
       text.textContent = TXT_READY;
       playIcon.innerHTML = playSvg;
@@ -2806,12 +2806,12 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAI
         showError(TXT_ERR_HLS);
         return;
       }
-      hls = new Hls({ enableWorker: true, lowLatencyMode: false });
+      hls = new Hls({ enableWorker: false, lowLatencyMode: false, maxBufferLength: 60, maxMaxBufferLength: 120 });
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (data.fatal) nextSource(token);
       });
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (token === generation) audio.play().catch(() => {});
+        if (token === generation) { audio.play().catch(() => {}); setStatus('playing'); hideError(); }
       });
       hls.loadSource(url);
       hls.attachMedia(audio);
