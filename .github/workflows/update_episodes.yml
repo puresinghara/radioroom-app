@@ -1,0 +1,37 @@
+name: Auto Update The Ghost Radio Episodes
+
+on:
+  schedule:
+    # Run every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  update-episodes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Ghost Radio Scraper
+        run: python scripts/update_ghost_episodes.py
+
+      - name: Commit and Push if Changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ghost_episodes.json
+          if git diff --staged --quiet; then
+            echo "No changes in episodes list."
+          else
+            git commit -m "Auto-update The Ghost Radio episodes [skip ci]"
+            git push
+          fi
