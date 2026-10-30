@@ -49,7 +49,7 @@ def clean_ghost_title_author(raw_title):
     
     return clean_title, author
 
-def fetch_channel_uploads(browse_id='VLUUM246zZ4qNNmFQ2WHnP_CRA', max_count=20):
+def fetch_ghost_uploads(browse_id='VLUUM246zZ4qNNmFQ2WHnP_CRA', max_count=20):
     payload = {
         'context': {
             'client': {
@@ -74,7 +74,6 @@ def fetch_channel_uploads(browse_id='VLUUM246zZ4qNNmFQ2WHnP_CRA', max_count=20):
                     items.extend(sec.get('itemSectionRenderer', {}).get('contents', []))
             
             for it in items:
-                # Modern lockupViewModel
                 if 'lockupViewModel' in it:
                     lvm = it['lockupViewModel']
                     vid = lvm.get('contentId')
@@ -93,39 +92,7 @@ def fetch_channel_uploads(browse_id='VLUUM246zZ4qNNmFQ2WHnP_CRA', max_count=20):
                     if vid and raw_title:
                         c_title, c_author = clean_ghost_title_author(raw_title)
                         episodes.append({
-                            'cat': 'latest',
-                            'title': c_title,
-                            'author': c_author,
-                            'id': vid,
-                            'tag': views,
-                            'date': published
-                        })
-                        if len(episodes) >= max_count:
-                            break
-
-                # Legacy playlistVideoRenderer fallback
-                elif 'playlistVideoRenderer' in it:
-                    pvr = it['playlistVideoRenderer']
-                    vid = pvr.get('videoId')
-                    t_runs = pvr.get('title', {}).get('runs', [])
-                    raw_title = ''.join(r.get('text', '') for r in t_runs) if t_runs else pvr.get('title', {}).get('simpleText', '')
-                    views = ''
-                    published = ''
-                    if 'videoInfo' in pvr:
-                        for r in pvr['videoInfo'].get('runs', []):
-                            pt = r.get('text', '')
-                            if 'ดู' in pt or 'views' in pt.lower():
-                                views = pt
-                            elif 'ผ่านมา' in pt or 'ago' in pt.lower() or 'สตรีม' in pt:
-                                published = pt
-                    if not views and 'viewCountText' in pvr:
-                        views = pvr['viewCountText'].get('simpleText', '')
-                    if not published and 'publishedTimeText' in pvr:
-                        published = pvr['publishedTimeText'].get('simpleText', '')
-                    
-                    if vid and raw_title:
-                        c_title, c_author = clean_ghost_title_author(raw_title)
-                        episodes.append({
+                            'channel': 'ghost',
                             'cat': 'latest',
                             'title': c_title,
                             'author': c_author,
@@ -139,7 +106,7 @@ def fetch_channel_uploads(browse_id='VLUUM246zZ4qNNmFQ2WHnP_CRA', max_count=20):
         print(f"Error fetching channel uploads: {e}")
     return episodes
 
-def fetch_youtube_category(query, cat_name, max_count=20):
+def fetch_ghost_category(query, cat_name, max_count=20):
     payload = {
         'context': {
             'client': {
@@ -171,6 +138,7 @@ def fetch_youtube_category(query, cat_name, max_count=20):
                     if vid and raw_title:
                         c_title, c_author = clean_ghost_title_author(raw_title)
                         episodes.append({
+                            'channel': 'ghost',
                             'cat': cat_name,
                             'title': c_title,
                             'author': c_author,
@@ -186,30 +154,128 @@ def fetch_youtube_category(query, cat_name, max_count=20):
         print(f"Error fetching category {cat_name}: {e}")
     return episodes
 
+def parse_views_num(view_str):
+    if not view_str:
+        return 0
+    s = view_str.replace('การดู', '').replace('ครั้ง', '').replace(',', '').strip()
+    mult = 1.0
+    if 'ล้าน' in s:
+        mult = 1000000.0
+        s = s.replace('ล้าน', '').strip()
+    elif 'แสน' in s:
+        mult = 100000.0
+        s = s.replace('แสน', '').strip()
+    elif 'หมื่น' in s:
+        mult = 10000.0
+        s = s.replace('หมื่น', '').strip()
+    elif 'พัน' in s:
+        mult = 1000.0
+        s = s.replace('พัน', '').strip()
+    try:
+        return float(s) * mult
+    except:
+        return 0
+
+def fetch_gungun_episodes():
+    print("Fetching Gun Gun episodes from channel...")
+    payload = {
+        'context': {
+            'client': {
+                'clientName': 'WEB',
+                'clientVersion': '2.20261026.01.00',
+                'hl': 'th',
+                'gl': 'TH'
+            }
+        },
+        'browseId': 'VLUUKKAr1SG8RZta9NLquSP_ig'
+    }
+    req = urllib.request.Request(BROWSE_URL, data=json.dumps(payload).encode('utf-8'), headers=HEADERS)
+    raw_list = []
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            tabs = data.get('contents', {}).get('twoColumnBrowseResultsRenderer', {}).get('tabs', [])
+            items = []
+            for tab in tabs:
+                sec_list = tab.get('tabRenderer', {}).get('content', {}).get('sectionListRenderer', {}).get('contents', [])
+                for sec in sec_list:
+                    items.extend(sec.get('itemSectionRenderer', {}).get('contents', []))
+            
+            for it in items:
+                if 'lockupViewModel' in it:
+                    lvm = it['lockupViewModel']
+                    vid = lvm.get('contentId')
+                    meta = lvm.get('metadata', {}).get('lockupMetadataViewModel', {})
+                    raw_title = meta.get('title', {}).get('content', '')
+                    views = ''
+                    published = ''
+                    rows = meta.get('metadata', {}).get('contentMetadataViewModel', {}).get('metadataRows', [])
+                    if len(rows) >= 2:
+                        parts = rows[1].get('metadataParts', [])
+                        if len(parts) >= 1:
+                            views = parts[0].get('text', {}).get('content', '')
+                        if len(parts) >= 2:
+                            published = parts[1].get('text', {}).get('content', '')
+                    
+                    if vid and raw_title:
+                        raw_list.append({
+                            'channel': 'gungun',
+                            'title': raw_title,
+                            'author': 'GUN GUN',
+                            'id': vid,
+                            'tag': views,
+                            'date': published,
+                            '_view_num': parse_views_num(views)
+                        })
+    except Exception as e:
+        print(f"Error fetching Gun Gun: {e}")
+    
+    latest = []
+    for ep in raw_list[:20]:
+        item = dict(ep)
+        item['cat'] = 'latest'
+        item.pop('_view_num', None)
+        latest.append(item)
+    
+    sorted_popular = sorted(raw_list, key=lambda x: x['_view_num'], reverse=True)
+    popular = []
+    for ep in sorted_popular[:20]:
+        item = dict(ep)
+        item['cat'] = 'popular'
+        item.pop('_view_num', None)
+        popular.append(item)
+    
+    print(f"Gun Gun: {len(latest)} latest, {len(popular)} popular")
+    return latest + popular
+
 def main():
-    print("Fetching fresh The Ghost Radio episodes...")
+    print("Fetching fresh The Ghost Radio & Gun Gun episodes...")
     all_episodes = []
     
-    # 1. Fetch Latest directly from channel upload feed (strictly chronological)
-    latest_eps = fetch_channel_uploads('VLUUM246zZ4qNNmFQ2WHnP_CRA', 20)
+    # 1. Ghost Radio - Latest
+    latest_eps = fetch_ghost_uploads('VLUUM246zZ4qNNmFQ2WHnP_CRA', 20)
     if not latest_eps or len(latest_eps) < 5:
-        print("Uploads playlist fallback to search...")
-        latest_eps = fetch_youtube_category('The Ghost Radio ตอนล่าสุด', 'latest', 20)
-    print(f"Fetched {len(latest_eps)} episodes for category: latest")
+        latest_eps = fetch_ghost_category('The Ghost Radio ตอนล่าสุด', 'latest', 20)
+    print(f"Fetched {len(latest_eps)} episodes for Ghost: latest")
     all_episodes.extend(latest_eps)
     
-    # 2. Fetch curated categories
+    # 2. Ghost Radio - Curated
     other_categories = [
         ('The Ghost Radio เรื่องยอดนิยม ประจำเดือน', 'monthly'),
         ('The Ghost Radio เรื่องยอดนิยม ประจำปี', 'yearly'),
         ('The Ghost Radio เรื่องดัง หลอนตลอดกาล', 'alltime')
     ]
     for query, cat in other_categories:
-        eps = fetch_youtube_category(query, cat, 20)
-        print(f"Fetched {len(eps)} episodes for category: {cat}")
+        eps = fetch_ghost_category(query, cat, 20)
+        print(f"Fetched {len(eps)} episodes for Ghost: {cat}")
         all_episodes.extend(eps)
     
-    if len(all_episodes) >= 20:
+    # 3. Gun Gun - Latest & Popular
+    gungun_eps = fetch_gungun_episodes()
+    all_episodes.extend(gungun_eps)
+    
+    print(f"Total collected episodes: {len(all_episodes)}")
+    if len(all_episodes) >= 40:
         for out_path in ['ghost_episodes.json', 'www/ghost_episodes.json']:
             try:
                 os.makedirs(os.path.dirname(out_path), exist_ok=True)
