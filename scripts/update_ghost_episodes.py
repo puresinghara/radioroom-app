@@ -1,4 +1,4 @@
-import os
+﻿import os
 import json
 import re
 import urllib.request
@@ -248,8 +248,81 @@ def fetch_gungun_episodes():
     print(f"Gun Gun: {len(latest)} latest, {len(popular)} popular")
     return latest + popular
 
+def fetch_cloudsphere_playlist(pl_id, cat, limit=20):
+    browse_id = f"VL{pl_id}"
+    payload = json.dumps({
+        'browseId': browse_id,
+        'context': {
+            'client': {
+                'clientName': 'WEB',
+                'clientVersion': '2.20241025.01.00',
+                'hl': 'th',
+                'gl': 'TH'
+            }
+        }
+    }).encode('utf-8')
+    req = urllib.request.Request(BROWSE_URL, data=payload, headers=HEADERS)
+    episodes = []
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            tabs = data.get('contents', {}).get('twoColumnBrowseResultsRenderer', {}).get('tabs', [])
+            items = []
+            for tab in tabs:
+                sec_list = tab.get('tabRenderer', {}).get('content', {}).get('sectionListRenderer', {}).get('contents', [])
+                for sec in sec_list:
+                    items.extend(sec.get('itemSectionRenderer', {}).get('contents', []))
+            
+            for it in items:
+                if 'lockupViewModel' in it:
+                    lvm = it['lockupViewModel']
+                    vid = lvm.get('contentId')
+                    if not vid and 'contentImage' in lvm:
+                        overlays = lvm['contentImage'].get('thumbnailViewModel', {}).get('overlays', [])
+                        for ov in overlays:
+                            badges = ov.get('thumbnailBottomOverlayViewModel', {}).get('badges', [])
+                            for b in badges:
+                                target_id = b.get('thumbnailBadgeViewModel', {}).get('animationActivationTargetId')
+                                if target_id:
+                                    vid = target_id
+                                    break
+                    meta = lvm.get('metadata', {}).get('lockupMetadataViewModel', {})
+                    raw_title = meta.get('title', {}).get('content', '')
+                    views = ''
+                    published = ''
+                    rows = meta.get('metadata', {}).get('contentMetadataViewModel', {}).get('metadataRows', [])
+                    if len(rows) >= 2:
+                        parts = rows[1].get('metadataParts', [])
+                        if len(parts) >= 1:
+                            views = parts[0].get('text', {}).get('content', '')
+                        if len(parts) >= 2:
+                            published = parts[1].get('text', {}).get('content', '')
+                    
+                    if vid and raw_title:
+                        episodes.append({
+                            'channel': 'cloudsphere',
+                            'cat': cat,
+                            'title': raw_title,
+                            'author': 'CLOUDSPHERE',
+                            'id': vid,
+                            'tag': views,
+                            'date': published
+                        })
+                        if len(episodes) >= limit:
+                            break
+    except Exception as e:
+        print(f"Error fetching CloudSphere ({cat}): {e}")
+    
+    print(f"CloudSphere ({cat}): {len(episodes)} episodes")
+    return episodes
+
+def fetch_cloudsphere_episodes():
+    general = fetch_cloudsphere_playlist('PLunG2ZUbd-Yyc0SLUjSI1fBFFrnUxkX4O', 'general', 20)
+    spooky = fetch_cloudsphere_playlist('PLunG2ZUbd-YyHFGS3BEm_SM7Od6bxfO7D', 'spooky', 20)
+    return general + spooky
+
 def main():
-    print("Fetching fresh The Ghost Radio & Gun Gun episodes...")
+    print("Fetching fresh The Ghost Radio, Gun Gun & CloudSphere episodes...")
     all_episodes = []
     
     # 1. Ghost Radio - Latest
@@ -273,6 +346,10 @@ def main():
     # 3. Gun Gun - Latest & Popular
     gungun_eps = fetch_gungun_episodes()
     all_episodes.extend(gungun_eps)
+
+    # 4. CloudSphere - General & Spooky
+    cloud_eps = fetch_cloudsphere_episodes()
+    all_episodes.extend(cloud_eps)
     
     print(f"Total collected episodes: {len(all_episodes)}")
     if len(all_episodes) >= 40:
