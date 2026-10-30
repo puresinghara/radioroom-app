@@ -473,49 +473,167 @@
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .yt-channel-tabs::-webkit-scrollbar { display: none; }
-    .yt-chan-pill {
+    .yt-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .yt-sec-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .yt-sec-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px 6px 8px;
+      gap: 5px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 24px;
-      color: #e0e0e0;
-      font-size: 0.85rem;
-      font-weight: 600;
+      color: #aaa;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .yt-shows-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 480px) {
+      .yt-shows-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+    }
+    .yt-show-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
+      transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+      position: relative;
+      overflow: hidden;
+      user-select: none;
     }
-    .yt-chan-pill:hover {
-      background: rgba(255, 255, 255, 0.16);
-      color: #fff;
+    .yt-show-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
     }
-    .yt-chan-pill.active {
-      background: #ffffff;
-      color: #121212;
-      border-color: #ffffff;
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    .yt-show-cover-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
-    .yt-pill-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
+    .yt-show-cover {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
+      display: block;
     }
-    .yt-hq-badge {
-      font-size: 0.65rem;
-      padding: 2px 6px;
+    .yt-show-hq-badge {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      font-size: 0.55rem;
+      font-weight: 800;
+      text-align: center;
+      padding: 2px 0;
+      letter-spacing: 0.03em;
+    }
+    .ghost-badge-tag {
+      background: rgba(0, 0, 0, 0.8);
+      color: #e74c3c;
+    }
+    .gungun-badge-tag {
       background: #1db954;
       color: #000;
-      border-radius: 6px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
     }
-    .yt-chan-pill.active .yt-hq-badge {
-      background: #121212;
+    .yt-show-details {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .yt-show-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.01em;
+    }
+    .yt-show-sub {
+      font-size: 0.75rem;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .yt-show-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #666;
+      margin-top: 2px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #666;
+    }
+    /* Ghost Active Card */
+    .yt-show-card#showCardGhost.active {
+      background: linear-gradient(135deg, rgba(176, 58, 46, 0.25) 0%, rgba(30, 20, 20, 0.95) 100%);
+      border-color: #e74c3c;
+      box-shadow: 0 4px 18px rgba(231, 76, 60, 0.35);
+    }
+    .yt-show-card#showCardGhost.active .yt-show-name {
+      color: #ff6b6b;
+    }
+    .yt-show-card#showCardGhost.active .status-dot {
+      background: #e74c3c;
+      box-shadow: 0 0 6px #e74c3c;
+    }
+    .yt-show-card#showCardGhost.active .status-text {
+      color: #e74c3c;
+    }
+
+    /* Gun Gun Active Card */
+    .yt-show-card#showCardGungun.active {
+      background: linear-gradient(135deg, rgba(29, 185, 84, 0.22) 0%, rgba(20, 30, 20, 0.95) 100%);
+      border-color: #1db954;
+      box-shadow: 0 4px 18px rgba(29, 185, 84, 0.35);
+    }
+    .yt-show-card#showCardGungun.active .yt-show-name {
+      color: #1db954;
+    }
+    .yt-show-card#showCardGungun.active .status-dot {
+      background: #1db954;
+      box-shadow: 0 0 6px #1db954;
+    }
+    .yt-show-card#showCardGungun.active .status-text {
       color: #1db954;
     }
     .ghost-section {
@@ -1575,20 +1693,14 @@
 
     <!-- DEDICATED THE GHOST RADIO SHOW & EPISODES SECTION -->
             <section class="ghost-section" id="ghostShowSection">
-      <div class="ghost-header-bar">
-        <div class="ghost-header-left">
-          <img src="" alt="The Ghost Radio" class="ghost-mini-logo" id="ghostHeroLogo">
-          <div class="ghost-header-meta">
-            <div class="ghost-title-row">
-              <h3 class="ghost-title" id="ghostSectionTitle">The Ghost Radio</h3>
-              <span class="ghost-badge" id="ghostSectionBadge">&#128251; AUDIO 144p</span>
-              
-            </div>
-            
-          </div>
+      <!-- YouTube Section Header with Prev/Next Controls -->
+      <div class="yt-section-header">
+        <div class="yt-sec-title-wrap">
+          <h3 class="ghost-title" id="ghostSectionTitle">YOUTUBE AUDIO SHOWS</h3>
+          <span class="yt-sec-badge">&#128251; PODCAST &amp; DJ MIXES</span>
         </div>
 
-        <!-- Carousel navigation arrows -->
+        <!-- Carousel navigation arrows for episodes shelf -->
         <div class="carousel-nav-controls">
           <button class="carousel-nav-btn" id="ghostScrollLeft" title="Prev">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -1599,21 +1711,43 @@
         </div>
       </div>
 
+      <!-- YouTube Creator Showcase Cards (Visible side-by-side with full covers!) -->
+      <div class="yt-shows-grid">
+        <!-- 1. The Ghost Radio Show Card -->
+        <div class="yt-show-card active" id="showCardGhost" onclick="switchYtChannel('ghost')">
+          <div class="yt-show-cover-wrap">
+            <img id="showCoverGhost" src="" alt="The Ghost Radio" class="yt-show-cover">
+            <span class="yt-show-hq-badge ghost-badge-tag">&#128251; 144p</span>
+          </div>
+          <div class="yt-show-details">
+            <div class="yt-show-name">The Ghost Radio</div>
+            <div class="yt-show-sub">&#3648;&#3619;&#3639;&#3656;&#3629;&#3591;&#3648;&#3621;&#3656;&#3634;&#3612;&#3637;&#3648;&#3604;&#3629;&#3632;&#3650;&#3585;&#3626; &#8226; 4 &#3627;&#3617;&#3623;&#3604;</div>
+            <div class="yt-show-status">
+              <span class="status-dot"></span> <span class="status-text">&#3585;&#3635;&#3621;&#3633;&#3591;&#3648;&#3621;&#3639;&#3629;&#3585;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. GUN GUN Show Card -->
+        <div class="yt-show-card" id="showCardGungun" onclick="switchYtChannel('gungun')">
+          <div class="yt-show-cover-wrap">
+            <img id="showCoverGungun" src="" alt="GUN GUN" class="yt-show-cover">
+            <span class="yt-show-hq-badge gungun-badge-tag">HQ 160k</span>
+          </div>
+          <div class="yt-show-details">
+            <div class="yt-show-name">GUN GUN</div>
+            <div class="yt-show-sub">DJ Wav Sessions &#8226; House &amp; Groove</div>
+            <div class="yt-show-status">
+              <span class="status-dot"></span> <span class="status-text">&#3648;&#3621;&#3639;&#3629;&#3585;&#3615;&#3633;&#3591;&#3594;&#3656;&#3629;&#3591;&#3609;&#3637;&#3657;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Local File Protocol Tip Banner -->
       <div class="ghost-tip-banner" id="ghostLocalTip" style="display: none;">
         <span>&#128161; <b>&#3649;&#3609;&#3632;&#3609;&#3635;:</b> &#3627;&#3634;&#3585;&#3648;&#3611;&#3636;&#3604;&#3605;&#3619;&#3591;&#3651;&#3609;&#3588;&#3629;&#3617; YouTube &#3629;&#3634;&#3592;&#3605;&#3636;&#3604; Error 153 &#3651;&#3627;&#3657;&#3604;&#3633;&#3610;&#3648;&#3610;&#3636;&#3621;&#3588;&#3621;&#3636;&#3585;&#3648;&#3611;&#3636;&#3604;&#3612;&#3656;&#3634;&#3609; <b>Start-Radio.bat</b> &#3648;&#3614;&#3639;&#3656;&#3629;&#3615;&#3633;&#3591;&#3605;&#3656;&#3629;&#3648;&#3609;&#3639;&#3656;&#3629;&#3591; 100% &#3588;&#3619;&#3633;&#3610;</span>
       </div>
-
-      <!-- YouTube Channel Switcher Bar -->
-      <div class="yt-channel-tabs" style="display: flex; gap: 10px; margin-bottom: 12px; overflow-x: auto;">
-        <button class="yt-chan-pill active" id="btnChanGhost" data-chan="ghost" onclick="switchYtChannel('ghost')">
-          The Ghost Radio
-        </button>
-        <button class="yt-chan-pill" id="btnChanGungun" data-chan="gungun" onclick="switchYtChannel('gungun')">
-          GUN GUN (DJ Mixes) <span class="yt-hq-badge">HQ 160k</span>
-        </button>
-      </div>
-
       <!-- Episode Filter Tabs for Ghost Radio -->
       <div class="ghost-tabs" id="tabsGhost">
         <button class="ghost-tab-btn active" data-cat="latest">&#127381; &#3605;&#3629;&#3609;&#3621;&#3656;&#3634;&#3626;&#3640;&#3604; (20)</button>
@@ -2806,11 +2940,13 @@ const GHOST_EPISODES = [
     if (tip) tip.style.display = 'flex';
   }
 
-  // Set Ghost hero logo
+  // Set Ghost & Gun Gun showcase covers
+  const coverGhost = document.getElementById('showCoverGhost');
+  if (coverGhost && typeof GHOST_LOGO !== 'undefined') coverGhost.src = GHOST_LOGO;
+  const coverGungun = document.getElementById('showCoverGungun');
+  if (coverGungun && typeof GUNGUN_LOGO !== 'undefined') coverGungun.src = GUNGUN_LOGO;
   const ghostLogoEl = document.getElementById('ghostHeroLogo');
-  if (ghostLogoEl && typeof GHOST_LOGO !== 'undefined') {
-    ghostLogoEl.src = GHOST_LOGO;
-  }
+  if (ghostLogoEl && typeof GHOST_LOGO !== 'undefined') ghostLogoEl.src = GHOST_LOGO;
 
   // Format seconds to mm:ss or hh:mm:ss
   function formatTime(sec) {
@@ -2963,12 +3099,16 @@ const GHOST_EPISODES = [
 
   function updateYtTrackInfo() {
     try {
+      const isGungun = (currentGhostEpisode && currentGhostEpisode.channel === 'gungun');
+      const chanLogo = isGungun ? (typeof GUNGUN_LOGO !== 'undefined' ? GUNGUN_LOGO : GHOST_LOGO) : GHOST_LOGO;
+      const chanTitle = isGungun ? 'GUN GUN' : 'The Ghost Radio';
       const title = currentGhostEpisode.title;
-      const author = currentGhostEpisode.author || 'The Ghost Radio';
+      const author = isGungun ? 'GUN GUN' : (currentGhostEpisode.author || 'The Ghost Radio');
+      const subText = isGungun ? title : (title + ' - ' + author);
 
-      document.getElementById('currTitle').textContent = 'The Ghost Radio';
-      document.getElementById('currSubtitle').textContent = title + ' - ' + author;
-      document.getElementById('currArt').src = GHOST_LOGO;
+      document.getElementById('currTitle').textContent = chanTitle;
+      document.getElementById('currSubtitle').textContent = subText;
+      document.getElementById('currArt').src = chanLogo;
       document.getElementById('stationSiteBtn').href = 'https://www.youtube.com/watch?v=' + currentGhostEpisode.id;
       document.getElementById('stationSiteBtn').textContent = TXT_WATCH_YT;
 
@@ -2978,17 +3118,20 @@ const GHOST_EPISODES = [
 
       // Update Now Playing banner
       const banner = document.getElementById('npBanner');
-      const npArt = document.getElementById('npArt'); if (npArt) npArt.src = GHOST_LOGO;
+      const npArt = document.getElementById('npArt'); if (npArt) npArt.src = chanLogo;
       const npSong = document.getElementById('npSong'); if (npSong) npSong.textContent = title;
-      const npArtst = document.getElementById('npArtist'); if (npArtst) npArtst.textContent = author + ' - The Ghost Radio';
+      const npArtst = document.getElementById('npArtist'); if (npArtst) npArtst.textContent = isGungun ? 'GUN GUN (DJ Mix)' : (author + ' - The Ghost Radio');
       if (banner) banner.style.display = 'flex';
+
+      // Sync to bottom sheet
+      syncNowPlayingSheet();
 
       if ('mediaSession' in navigator && window.MediaMetadata) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: title,
           artist: author,
-          album: 'The Ghost Radio',
-          artwork: [{ src: GHOST_LOGO }]
+          album: chanTitle,
+          artwork: [{ src: chanLogo }]
         });
       }
     } catch {}
@@ -3080,38 +3223,31 @@ const GHOST_EPISODES = [
     currentYtChannel = chan;
     currentGhostCat = 'latest';
 
-    // Update Channel Pills
-    document.querySelectorAll('.yt-chan-pill').forEach(p => {
-      p.classList.toggle('active', p.dataset.chan === chan);
-    });
-
-    const logoEl = document.getElementById('ghostHeroLogo');
-    const titleEl = document.getElementById('ghostSectionTitle');
-    const badgeEl = document.getElementById('ghostSectionBadge');
+    // Update Showcase Show Cards
+    const cardGhost = document.getElementById('showCardGhost');
+    const cardGungun = document.getElementById('showCardGungun');
+    const statusGhost = cardGhost ? cardGhost.querySelector('.status-text') : null;
+    const statusGungun = cardGungun ? cardGungun.querySelector('.status-text') : null;
     const tabsGhost = document.getElementById('tabsGhost');
     const tabsGungun = document.getElementById('tabsGungun');
 
     if (chan === 'gungun') {
-      if (logoEl && typeof GUNGUN_LOGO !== 'undefined') logoEl.src = GUNGUN_LOGO;
-      if (titleEl) titleEl.textContent = 'GUN GUN';
-      if (badgeEl) {
-        badgeEl.textContent = 'HQ STEREO (160k)';
-        badgeEl.style.borderColor = '#1db954';
-        badgeEl.style.color = '#1db954';
-      }
+      if (cardGhost) cardGhost.classList.remove('active');
+      if (cardGungun) cardGungun.classList.add('active');
+      if (statusGhost) statusGhost.textContent = '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1F\u0E31\u0E07\u0E0A\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49';
+      if (statusGungun) statusGungun.textContent = '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E40\u0E25\u0E37\u0E2D\u0E01';
+
       if (tabsGhost) tabsGhost.style.display = 'none';
       if (tabsGungun) {
         tabsGungun.style.display = 'flex';
         tabsGungun.querySelectorAll('.ghost-tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
       }
     } else {
-      if (logoEl && typeof GHOST_LOGO !== 'undefined') logoEl.src = GHOST_LOGO;
-      if (titleEl) titleEl.textContent = 'The Ghost Radio';
-      if (badgeEl) {
-        badgeEl.textContent = 'YOUTUBE AUDIO';
-        badgeEl.style.borderColor = 'rgba(176, 58, 46, 0.4)';
-        badgeEl.style.color = '#e74c3c';
-      }
+      if (cardGungun) cardGungun.classList.remove('active');
+      if (cardGhost) cardGhost.classList.add('active');
+      if (statusGhost) statusGhost.textContent = '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E40\u0E25\u0E37\u0E2D\u0E01';
+      if (statusGungun) statusGungun.textContent = '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1F\u0E31\u0E07\u0E0A\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49';
+
       if (tabsGungun) tabsGungun.style.display = 'none';
       if (tabsGhost) {
         tabsGhost.style.display = 'flex';
@@ -3142,7 +3278,7 @@ const GHOST_EPISODES = [
       img.src = 'https://i.ytimg.com/vi/' + ep.id + '/mqdefault.jpg';
       img.alt = ep.title;
       img.loading = 'lazy';
-      img.onerror = () => { img.src = GHOST_LOGO; };
+      img.onerror = () => { img.src = (ep.channel === 'gungun' && typeof GUNGUN_LOGO !== 'undefined') ? GUNGUN_LOGO : GHOST_LOGO; };
 
       const tag = document.createElement('span');
       tag.className = 'episode-tag-badge';
