@@ -462,6 +462,27 @@ jobs:
               }
 
               @Override
+              public void onTaskRemoved(Intent rootIntent) {
+                  abandonAudioFocus();
+                  try {
+                      if (mediaSession != null) {
+                          mediaSession.setActive(false);
+                          mediaSession.release();
+                      }
+                      if (wakeLock != null && wakeLock.isHeld()) {
+                          wakeLock.release();
+                      }
+                      stopForeground(true);
+                      NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                      if (nm != null) {
+                          nm.cancel(NOTIFICATION_ID);
+                      }
+                  } catch (Throwable t) {}
+                  stopSelf();
+                  super.onTaskRemoved(rootIntent);
+              }
+
+              @Override
               public void onDestroy() {
                   abandonAudioFocus();
                   try {
@@ -471,6 +492,11 @@ jobs:
                       }
                       if (wakeLock != null && wakeLock.isHeld()) {
                           wakeLock.release();
+                      }
+                      stopForeground(true);
+                      NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                      if (nm != null) {
+                          nm.cancel(NOTIFICATION_ID);
                       }
                   } catch (Throwable t) {}
                   super.onDestroy();
@@ -650,6 +676,11 @@ jobs:
 
               @Override
               public void onDestroy() {
+                  try {
+                      Intent serviceIntent = new Intent(this, MediaNotificationService.class);
+                      serviceIntent.setAction(MediaNotificationService.ACTION_STOP);
+                      stopService(serviceIntent);
+                  } catch (Throwable t) {}
                   try {
                       if (wakeLock != null && wakeLock.isHeld()) {
                           wakeLock.release();
