@@ -2212,44 +2212,11 @@ const GHOST_EPISODES = [
     "date": "1 \u0e1b\u0e35\u0e17\u0e35\u0e48\u0e41\u0e25\u0e49\u0e27"
   }
 ];
-
-  function syncGhostEpisodes() {
-    try {
-      const cached = localStorage.getItem('ghost_episodes_cache');
-      if (cached) {
-        const data = JSON.parse(cached);
-        if (Array.isArray(data) && data.length > 0) {
-          window.ghostEpisodesList = data;
-          renderGhostEpisodes();
-        }
-      }
-    } catch (e) {}
-
-    const endpoints = [
-      'https://raw.githubusercontent.com/puresinghara/radioroom-app/main/ghost_episodes.json?t=' + Date.now(),
-      './ghost_episodes.json'
-    ];
-
-    async function loadEndpoint(i) {
-      if (i >= endpoints.length) return;
-      try {
-        const res = await fetch(endpoints[i]);
-        if (res.ok) {
-          const list = await res.json();
-          if (Array.isArray(list) && list.length > 0) {
-            window.ghostEpisodesList = list;
-            try { localStorage.setItem('ghost_episodes_cache', JSON.stringify(list)); } catch (e) {}
-            renderGhostEpisodes();
-            return;
-          }
-        }
-      } catch (err) {}
-      loadEndpoint(i + 1);
-    }
-
-    loadEndpoint(0);
-  }
-
+</script>
+<script>
+  'use strict';
+  const audio = document.getElementById('audioElement');
+  let selectedRadio = STATIONS[0];
   let hls = null;
   let generation = 0;
   let isPlaying = false;
@@ -3555,6 +3522,43 @@ const GHOST_EPISODES = [
     if (e.key === 'Escape') closeNowPlayingSheet();
   });
 
+
+  function syncGhostEpisodes() {
+    try {
+      const cached = localStorage.getItem('ghost_episodes_cache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (Array.isArray(data) && data.length > 0) {
+          window.ghostEpisodesList = data;
+          renderGhostEpisodes();
+        }
+      }
+    } catch (e) {}
+
+    const endpoints = [
+      'https://raw.githubusercontent.com/puresinghara/radioroom-app/main/ghost_episodes.json?t=' + Date.now(),
+      './ghost_episodes.json'
+    ];
+
+    async function loadEndpoint(i) {
+      if (i >= endpoints.length) return;
+      try {
+        const res = await fetch(endpoints[i]);
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && list.length > 0) {
+            window.ghostEpisodesList = list;
+            try { localStorage.setItem('ghost_episodes_cache', JSON.stringify(list)); } catch (e) {}
+            renderGhostEpisodes();
+            return;
+          }
+        }
+      } catch (err) {}
+      loadEndpoint(i + 1);
+    }
+
+    loadEndpoint(0);
+  }
   initGreeting();
   renderStations();
   renderGhostEpisodes();

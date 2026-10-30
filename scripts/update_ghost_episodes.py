@@ -200,9 +200,9 @@ def main():
     
     # 2. Fetch curated categories
     other_categories = [
-        ('The Ghost Radio popular month', 'monthly'),
-        ('The Ghost Radio popular year', 'yearly'),
-        ('The Ghost Radio all time', 'alltime')
+        ('The Ghost Radio เรื่องยอดนิยม ประจำเดือน', 'monthly'),
+        ('The Ghost Radio เรื่องยอดนิยม ประจำปี', 'yearly'),
+        ('The Ghost Radio เรื่องดัง หลอนตลอดกาล', 'alltime')
     ]
     for query, cat in other_categories:
         eps = fetch_youtube_category(query, cat, 20)
