@@ -2837,6 +2837,16 @@ const GHOST_EPISODES = [
       if (token === generation) nextSource(token);
     };
 
+    audio.onpause = () => {
+      if (!userExplicitPaused && !isYtMode && isPlaying && token === generation) {
+        setTimeout(() => {
+          if (!userExplicitPaused && !isYtMode && isPlaying && token === generation && audio.paused) {
+            audio.play().catch(() => {});
+          }
+        }, 50);
+      }
+    };
+
     if (selectedRadio.type === 'hls' && !audio.canPlayType('application/vnd.apple.mpegurl')) {
       if (!window.Hls || !Hls.isSupported()) {
         showError(TXT_ERR_HLS);
@@ -3374,38 +3384,52 @@ const GHOST_EPISODES = [
   renderStations();
   renderGhostEpisodes();
   selectRadioStation(STATIONS[0], false);
-  // YouTube background playback watchdog & visibility auto-resume
+  // Universal background playback watchdog & visibility auto-resume
   document.addEventListener('visibilitychange', () => {
-    if (isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-      setTimeout(() => {
-        if (isYtMode && !userExplicitPaused) {
-          try { ytPlayer.playVideo(); } catch(e) {}
-        }
-      }, 100);
+    if (userExplicitPaused) return;
+    if (isYtMode) {
+      if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+        try { ytPlayer.playVideo(); } catch(e) {}
+      }
+    } else {
+      if (isPlaying && audio.paused) {
+        audio.play().catch(() => {});
+      }
     }
   });
 
   window.addEventListener('blur', () => {
-    if (isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-      setTimeout(() => {
-        if (isYtMode && !userExplicitPaused) {
-          try { ytPlayer.playVideo(); } catch(e) {}
-        }
-      }, 100);
+    if (userExplicitPaused) return;
+    if (isYtMode) {
+      if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+        try { ytPlayer.playVideo(); } catch(e) {}
+      }
+    } else {
+      if (isPlaying && audio.paused) {
+        audio.play().catch(() => {});
+      }
     }
   });
 
-  // Lightweight YouTube watchdog: check every 2 seconds if background pause occurred unexpectedly
+  // Universal background playback watchdog (checks every 1 second)
   setInterval(() => {
-    if (isYtMode && !userExplicitPaused && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-      try {
-        const st = ytPlayer.getPlayerState();
-        if (st === 2) { // 2 = PAUSED
-          ytPlayer.playVideo();
-        }
-      } catch(e) {}
+    if (userExplicitPaused) return;
+
+    if (isYtMode) {
+      if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+        try {
+          const st = ytPlayer.getPlayerState();
+          if (st === 2) { // 2 = PAUSED
+            ytPlayer.playVideo();
+          }
+        } catch(e) {}
+      }
+    } else {
+      if (isPlaying && audio.paused) {
+        audio.play().catch(() => {});
+      }
     }
-  }, 2000);
+  }, 1000);
 </script>
 </body>
 </html>
