@@ -86,28 +86,43 @@ jobs:
 
               @Override
               protected void onWindowVisibilityChanged(int visibility) {
-                  // Chromium WebView automatically pauses HTML5 video elements (YouTube iframe & Cat Radio HLS video track)
-                  // whenever onWindowVisibilityChanged(View.GONE) is received (screen lock or app minimized).
-                  // By strictly reporting View.VISIBLE to Chromium's internal engine, background media playback is never paused.
-                  if (visibility == View.GONE) {
-                      super.onWindowVisibilityChanged(View.VISIBLE);
-                  } else {
-                      super.onWindowVisibilityChanged(visibility);
-                  }
+                  // Always report VISIBLE so Chromium never throttles background media or JS timers
+                  super.onWindowVisibilityChanged(View.VISIBLE);
               }
 
               @Override
               protected void onVisibilityChanged(View changedView, int visibility) {
-                  if (visibility == View.GONE) {
-                      super.onVisibilityChanged(changedView, View.VISIBLE);
-                  } else {
-                      super.onVisibilityChanged(changedView, visibility);
-                  }
+                  super.onVisibilityChanged(changedView, View.VISIBLE);
+              }
+
+              @Override
+              public void onWindowFocusChanged(boolean hasWindowFocus) {
+                  super.onWindowFocusChanged(true);
+              }
+
+              @Override
+              public boolean hasWindowFocus() {
+                  return true;
+              }
+
+              @Override
+              public int getWindowVisibility() {
+                  return View.VISIBLE;
+              }
+
+              @Override
+              public int getVisibility() {
+                  return View.VISIBLE;
               }
 
               @Override
               public void onPause() {
                   // Prevent Chromium from pausing HTML5 video/audio execution on Activity pause
+              }
+
+              @Override
+              public void pauseTimers() {
+                  // Prevent Capacitor from pausing JavaScript timers when app is backgrounded
               }
           }
           EOF
@@ -269,7 +284,9 @@ jobs:
                   if (intent != null) {
                       String action = intent.getAction();
                       if (ACTION_START.equals(action) || ACTION_UPDATE.equals(action)) {
-                          requestAudioFocus();
+                        if (ACTION_START.equals(action)) {
+                            requestAudioFocus();
+                        }
                           if (intent.hasExtra(EXTRA_TITLE)) currentTitle = intent.getStringExtra(EXTRA_TITLE);
                           if (intent.hasExtra(EXTRA_SUBTITLE)) currentSubtitle = intent.getStringExtra(EXTRA_SUBTITLE);
                           if (intent.hasExtra(EXTRA_IS_PLAYING)) isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true);
