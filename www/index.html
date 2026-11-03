@@ -4157,6 +4157,8 @@ const GHOST_EPISODES = [
 
 <script>
   'use strict';
+  let lastStatusState = null;
+  let lastStatusMsg = null;
   const audio = document.getElementById('audioElement');
   let selectedRadio = STATIONS[0];
   let hls = null;
