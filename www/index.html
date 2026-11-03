@@ -819,145 +819,7 @@
       border-color: var(--sp-green);
     }
 
-    .ghost-carousel-wrapper {
-      position: relative;
-      width: 100%;
-    }
-
-    .episode-grid {
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      gap: 12px;
-      padding: 4px 2px 12px 2px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-    }
-
-    .episode-grid::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .episode-grid::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 10px;
-    }
-
-    .episode-grid::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-    }
-
-    .episode-grid::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.35);
-    }
-
-    .episode-card {
-      flex: 0 0 170px;
-      width: 170px;
-      background: #181818;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 10px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      scroll-snap-align: start;
-    }
-
-    .episode-card:hover {
-      background: #242424;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .episode-card.playing {
-      border-color: var(--sp-green);
-      background: rgba(29, 185, 84, 0.08);
-    }
-
-    .episode-thumb-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #000;
-      margin-bottom: 8px;
-    }
-
-    .episode-thumb {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.3s;
-    }
-
-    .episode-card:hover .episode-thumb {
-      transform: scale(1.05);
-    }
-
-    .episode-tag-badge {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(4px);
-      color: #1ed760;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      max-width: 90%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .episode-play-btn {
-      position: absolute;
-      bottom: 6px;
-      right: 6px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--sp-green);
-      color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-      opacity: 0;
-      transform: translateY(4px);
-      transition: all 0.2s ease;
-    }
-
-    .episode-card:hover .episode-play-btn,
-    .episode-card.playing .episode-play-btn {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .episode-title {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.25;
-      margin-bottom: 4px;
-      height: 2.5em;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
+    /* Obsolete carousel CSS removed */
 
     .episode-author {
       font-size: 0.74rem;
@@ -2395,6 +2257,356 @@
       fill: currentColor !important;
       margin-left: 2px !important;
     }
+    /* Brand App Logo in Header */
+    .brand-app-logo {
+      width: 28px !important;
+      height: 28px !important;
+      min-width: 28px !important;
+      border-radius: 8px !important;
+      object-fit: cover !important;
+      box-shadow: 0 2px 8px rgba(0, 230, 118, 0.25) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    /* YouTube Channel Switcher Pills */
+    .yt-channel-tabs {
+      display: flex !important;
+      gap: 8px !important;
+      overflow-x: auto !important;
+      padding: 4px 0 10px 0 !important;
+      scrollbar-width: none !important;
+      -webkit-overflow-scrolling: touch !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .yt-channel-tabs::-webkit-scrollbar { display: none; }
+
+    .yt-channel-chip {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      padding: 6px 14px !important;
+      border-radius: 18px !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-size: 0.78rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      font-family: inherit !important;
+    }
+    .yt-channel-chip:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #fff !important;
+    }
+    .yt-channel-chip.active {
+      background: #00e676 !important;
+      color: #000 !important;
+      border-color: #00e676 !important;
+      box-shadow: 0 4px 14px rgba(0, 230, 118, 0.28) !important;
+      font-weight: 700 !important;
+    }
+    .yt-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* YouTube Channel Bento Header */
+    .yt-channel-bento {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 10px !important;
+      padding: 10px 12px !important;
+      border-radius: 16px !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      margin-bottom: 10px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    .yt-bento-left {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+    .yt-bento-art {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      max-width: 44px !important;
+      border-radius: 10px !important;
+      object-fit: cover !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      flex-shrink: 0 !important;
+    }
+    .yt-bento-meta {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+      min-width: 0 !important;
+      flex: 1 1 0% !important;
+      overflow: hidden !important;
+    }
+    .yt-bento-title-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+    .yt-bento-title {
+      font-size: 0.9rem !important;
+      font-weight: 700 !important;
+      color: #fff !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    .yt-bento-status-pill {
+      font-size: 0.6rem !important;
+      font-weight: 700 !important;
+      color: #00e676 !important;
+      background: rgba(0, 230, 118, 0.14) !important;
+      padding: 1px 6px !important;
+      border-radius: 8px !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+    }
+    .yt-bento-sub {
+      font-size: 0.7rem !important;
+      color: rgba(255, 255, 255, 0.55) !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    .yt-bento-right {
+      flex-shrink: 0 !important;
+    }
+    .yt-bento-play-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      background: #00e676 !important;
+      color: #000 !important;
+      border: none !important;
+      border-radius: 14px !important;
+      padding: 6px 11px !important;
+      font-size: 0.72rem !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      transition: transform 0.15s ease, background 0.2s ease !important;
+      font-family: inherit !important;
+    }
+    .yt-bento-play-btn:active {
+      transform: scale(0.96) !important;
+    }
+
+    /* Subcategory Filter Tabs (Pills) */
+    .ghost-tabs {
+      display: flex;
+      gap: 8px !important;
+      overflow-x: auto !important;
+      padding: 2px 0 10px 0 !important;
+      scrollbar-width: none !important;
+      -webkit-overflow-scrolling: touch !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .ghost-tabs::-webkit-scrollbar { display: none; }
+
+    .ghost-tab-btn {
+      padding: 5px 12px !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.09) !important;
+      border-radius: 16px !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+      font-size: 0.74rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      font-family: inherit !important;
+      transition: all 0.2s ease !important;
+    }
+    .ghost-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.12) !important;
+      color: #fff !important;
+    }
+    .ghost-tab-btn.active {
+      background: rgba(255, 255, 255, 0.18) !important;
+      color: #fff !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      font-weight: 700 !important;
+    }
+
+    /* Episode List & Episode Cards (Unified 1-Column Horizontal Row) */
+    .episode-list-container,
+    .episode-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow: visible !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .episode-card {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 12px !important;
+      padding: 10px 14px !important;
+      border-radius: 18px !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      cursor: pointer !important;
+      position: relative !important;
+      overflow: hidden !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      flex: none !important;
+      height: auto !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .episode-card:hover {
+      background: rgba(255, 255, 255, 0.07) !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
+      transform: translateY(-1px) !important;
+    }
+    .episode-card.active, .episode-card.playing {
+      background: rgba(0, 230, 118, 0.08) !important;
+      border-color: rgba(0, 230, 118, 0.35) !important;
+    }
+
+    .episode-card .card-art-wrap {
+      width: 52px !important;
+      min-width: 52px !important;
+      max-width: 52px !important;
+      height: 52px !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+      margin: 0 !important;
+      position: relative !important;
+      background: #111 !important;
+    }
+    .episode-card .card-art {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+
+    .episode-card .card-meta {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      gap: 3px !important;
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+
+    .episode-card .card-name-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+    .episode-card .card-name {
+      font-size: 0.88rem !important;
+      font-weight: 700 !important;
+      color: #fff !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      line-height: 1.25 !important;
+      display: block !important;
+      width: 100% !important;
+    }
+
+    .episode-card .card-badges-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 100% !important;
+    }
+
+    .episode-card .card-track {
+      font-size: 0.7rem !important;
+      color: rgba(255, 255, 255, 0.5) !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      line-height: 1.2 !important;
+    }
+
+    .episode-card .card-play-btn {
+      width: 38px !important;
+      min-width: 38px !important;
+      max-width: 38px !important;
+      height: 38px !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #fff !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      flex-shrink: 0 !important;
+      margin-left: 6px !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      position: static !important;
+      transform: none !important;
+      padding: 0 !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .episode-card .card-play-btn:hover {
+      background: rgba(255, 255, 255, 0.18) !important;
+      transform: scale(1.05) !important;
+    }
+    .episode-card.active .card-play-btn,
+    .episode-card.playing .card-play-btn {
+      background: #00e676 !important;
+      color: #000 !important;
+      border-color: #00e676 !important;
+      box-shadow: 0 4px 12px rgba(0, 230, 118, 0.35) !important;
+    }
+    .episode-card.active .eq-overlay,
+    .episode-card.playing .eq-overlay {
+      display: flex !important;
+    }
   </style>
 </head>
 <body>
@@ -2403,12 +2615,7 @@
 
     <header>
     <a href="#" class="brand">
-      <div class="brand-badge-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="2"></circle>
-          <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
-        </svg>
-      </div>
+      <img src="app_logo.png" alt="Radio Room" class="brand-app-logo">
       <div class="brand-text">
         <span class="brand-title">Radio Room</span>
       </div>
@@ -2448,89 +2655,62 @@
     <div id="sectionsContainer"></div>
 
     <!-- DEDICATED THE GHOST RADIO SHOW & EPISODES SECTION -->
-            <section class="ghost-section" id="ghostShowSection">
-      <!-- YouTube Section Header -->
-      <div class="yt-section-header">
-        <div class="yt-sec-title-wrap">
-          <h3 class="ghost-title" id="ghostSectionTitle">Youtube Audio Channels</h3>
-          <span class="yt-sec-badge" style="background: rgba(0, 230, 118, 0.12); color: #00e676; border-color: rgba(0, 230, 118, 0.3); font-weight: 700; font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;">&#9679; 3 CHANNELS</span>
+    <section class="ghost-section" id="ghostShowSection" style="display: none;">
+      <!-- YouTube Channel Pills Switcher -->
+      <div class="yt-channel-tabs" id="ytChannelTabs">
+        <button class="yt-channel-chip active" id="ytPillGhost" onclick="switchYtChannel('ghost')">
+          <span class="yt-chip-dot"></span> The Ghost Radio
+        </button>
+        <button class="yt-channel-chip" id="ytPillGungun" onclick="switchYtChannel('gungun')">
+          <span class="yt-chip-dot"></span> GUN GUN
+        </button>
+        <button class="yt-channel-chip" id="ytPillCloud" onclick="switchYtChannel('cloudsphere')">
+          <span class="yt-chip-dot"></span> CLOUDSPHERE
+        </button>
+      </div>
+
+      <!-- YouTube Channel Bento Header Card -->
+      <div class="yt-channel-bento" id="ytChannelBento">
+        <div class="yt-bento-left">
+          <img id="ytBentoLogo" src="" alt="Channel Logo" class="yt-bento-art">
+          <div class="yt-bento-meta">
+            <div class="yt-bento-title-row">
+              <h3 class="yt-bento-title" id="ytBentoTitle">The Ghost Radio</h3>
+              <span class="yt-bento-status-pill" id="ytBentoStatus">&#9679; ACTIVE</span>
+            </div>
+            <p class="yt-bento-sub" id="ytBentoSub">Live Ghost Stories &amp; Supernatural</p>
+          </div>
+        </div>
+        <div class="yt-bento-right">
+          <button class="yt-bento-play-btn" id="ytBentoPlayBtn" onclick="playCurrentChannelLive()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span id="ytBentoPlayTxt">Listen Live</span>
+          </button>
         </div>
       </div>
 
-      <!-- YouTube Creator Showcase Cards (Visible side-by-side with full covers!) -->
-      <div class="yt-shows-grid">
-        <!-- 1. The Ghost Radio Show Card -->
-        <div class="yt-show-card active" id="showCardGhost" onclick="switchYtChannel('ghost')">
-          <div class="yt-show-cover-wrap">
-            <img id="showCoverGhost" src="" alt="The Ghost Radio" class="yt-show-cover">
-            <span class="yt-show-hq-badge ghost-badge-tag">&#128251; 144p</span>
-          </div>
-          <div class="yt-show-details">
-            <div class="yt-show-name">The Ghost Radio</div>
-            <div class="yt-show-sub">Live Ghost Stories &amp; Supernatural</div>
-            <div class="yt-show-status">
-              <span class="status-dot"></span> <span class="status-text">&#3585;&#3635;&#3621;&#3633;&#3591;&#3648;&#3621;&#3639;&#3629;&#3585;</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. GUN GUN Show Card -->
-        <div class="yt-show-card" id="showCardGungun" onclick="switchYtChannel('gungun')">
-          <div class="yt-show-cover-wrap">
-            <img id="showCoverGungun" src="" alt="GUN GUN" class="yt-show-cover">
-            <span class="yt-show-hq-badge gungun-badge-tag">HQ 160k</span>
-          </div>
-          <div class="yt-show-details">
-            <div class="yt-show-name">GUN GUN</div>
-            <div class="yt-show-sub">DJ Wav Sessions &#8226; House &amp; Groove</div>
-            <div class="yt-show-status">
-              <span class="status-dot"></span> <span class="status-text">Select Channel</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. CLOUDSPHERE Show Card -->
-        <div class="yt-show-card" id="showCardCloud" onclick="switchYtChannel('cloudsphere')">
-          <div class="yt-show-cover-wrap">
-            <img id="showCoverCloud" src="" alt="CLOUDSPHERE" class="yt-show-cover">
-            <span class="yt-show-hq-badge cloud-badge-tag">&#128251; 144p</span>
-          </div>
-          <div class="yt-show-details">
-            <div class="yt-show-name">CLOUDSPHERE</div>
-            <div class="yt-show-sub">Japanese Stories &amp; Urban Legends</div>
-            <div class="yt-show-status">
-              <span class="status-dot"></span> <span class="status-text">Select Channel</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Local File Protocol Tip Banner -->
-      <div class="ghost-tip-banner" id="ghostLocalTip" style="display: none;">
-        <span>&#128161; <b>Tip:</b> If playing locally, launch via <b>Start-Radio.bat</b> for smooth playback.</span>
-      </div>
-      <!-- Episode Filter Tabs for Ghost Radio -->
+      <!-- Episode Filter Tabs for The Ghost Radio -->
       <div class="ghost-tabs" id="tabsGhost">
-        <button class="ghost-tab-btn active" data-cat="latest">&#127381; Latest Episodes (20)</button>
-        <button class="ghost-tab-btn" data-cat="monthly">&#127769; This Month (10)</button>
-        <button class="ghost-tab-btn" data-cat="yearly">&#128197; Best of 2026 (10)</button>
-        <button class="ghost-tab-btn" data-cat="alltime">&#127775; All-Time Classic (10)</button>
+        <button class="ghost-tab-btn active" data-cat="latest">Latest Episodes (20)</button>
+        <button class="ghost-tab-btn" data-cat="monthly">This Month (10)</button>
+        <button class="ghost-tab-btn" data-cat="yearly">Best of 2026 (10)</button>
+        <button class="ghost-tab-btn" data-cat="alltime">All-Time Classic (10)</button>
       </div>
 
-      <!-- Episode Filter Tabs for GUN GUN (Only 2 tabs: Latest & Popular) -->
+      <!-- Episode Filter Tabs for GUN GUN -->
       <div class="ghost-tabs" id="tabsGungun" style="display: none;">
-        <button class="ghost-tab-btn active" data-cat="latest">&#127381; Latest Mixes (20)</button>
-        <button class="ghost-tab-btn" data-cat="popular">&#128293; Most Popular (20)</button>
+        <button class="ghost-tab-btn active" data-cat="latest">Latest Mixes (20)</button>
+        <button class="ghost-tab-btn" data-cat="popular">Most Popular (20)</button>
       </div>
 
-      <!-- Episode Filter Tabs for CLOUDSPHERE (2 tabs: General & Spooky) -->
+      <!-- Episode Filter Tabs for CLOUDSPHERE -->
       <div class="ghost-tabs" id="tabsCloud" style="display: none;">
-        <button class="ghost-tab-btn active" data-cat="general">&#128172; General Stories (20)</button>
-        <button class="ghost-tab-btn" data-cat="spooky">&#128123; Spooky Stories (20)</button>
+        <button class="ghost-tab-btn active" data-cat="general">General Stories (20)</button>
+        <button class="ghost-tab-btn" data-cat="spooky">Spooky Stories (20)</button>
       </div>
 
-      <!-- Horizontal Scrollable Episode Shelf -->
-      <div class="ghost-carousel-wrapper">
+      <!-- Episodes List (Single Column Horizontal Cards matching Radio style) -->
+      <div class="episode-list-container">
         <div class="episode-grid" id="ghostEpisodeGrid"></div>
       </div>
     </section>
@@ -2547,13 +2727,13 @@
 
     <div class="player-center">
       <div class="player-controls">
-        <button class="ctrl-btn skip" id="prevBtn" title="&#3626;&#3606;&#3634;&#3609;&#3637;/&#3605;&#3629;&#3609;&#3585;&#3656;&#3629;&#3609;&#3627;&#3609;&#3657;&#3634;">
+        <button class="ctrl-btn skip" id="prevBtn" title="Previous">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
         </button>
-        <button class="ctrl-btn play-pause" id="playBtn" title="&#3648;&#3621;&#3656;&#3609;/&#3627;&#3618;&#3640;&#3604;">
+        <button class="ctrl-btn play-pause" id="playBtn" title="Play / Pause">
           <svg id="playIconSvg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <button class="ctrl-btn skip" id="nextBtn" title="&#3626;&#3606;&#3634;&#3609;&#3637;/&#3605;&#3629;&#3609;&#3606;&#3633;&#3604;&#3652;&#3611;">
+        <button class="ctrl-btn skip" id="nextBtn" title="Next">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
         </button>
       </div>
@@ -2570,9 +2750,9 @@
     </div>
 
     <div class="player-right">
-      <a href="#" target="_blank" rel="noopener noreferrer" class="ext-link-btn" id="stationSiteBtn">&#3648;&#3623;&#3655;&#3610;&#3626;&#3606;&#3634;&#3609;&#3637; &#8599;</a>
+      <a href="#" target="_blank" rel="noopener noreferrer" class="ext-link-btn" id="stationSiteBtn">Website &#8599;</a>
       <div class="volume-box">
-        <button class="ctrl-btn" id="muteBtn" title="&#3611;&#3636;&#3604;/&#3648;&#3611;&#3636;&#3604;&#3648;&#3626;&#3637;&#3618;&#3591;">
+        <button class="ctrl-btn" id="muteBtn" title="Mute / Unmute">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
         </button>
         <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
@@ -2603,10 +2783,10 @@
       <div class="sheet-meta">
         <div class="sheet-live-badge" id="sheetLiveBadge">
           <span class="sheet-live-dot"></span>
-          <span id="sheetLiveText">&#3626;&#3606;&#3634;&#3609;&#3637;&#3626;&#3604;</span>
+          <span id="sheetLiveText">Live Stream</span>
         </div>
-        <h2 class="sheet-title" id="sheetTitle">&#3648;&#3621;&#3639;&#3629;&#3585;&#3626;&#3606;&#3634;&#3609;&#3637;&#3607;&#3637;&#3656;&#3605;&#3657;&#3629;&#3591;&#3585;&#3634;&#3619;</h2>
-        <p class="sheet-subtitle" id="sheetSubtitle">&#3614;&#3619;&#3657;&#3629;&#3617;&#3648;&#3621;&#3656;&#3609;</p>
+        <h2 class="sheet-title" id="sheetTitle">Radio Room</h2>
+        <p class="sheet-subtitle" id="sheetSubtitle">Select a station to play</p>
       </div>
 
       <!-- YouTube Progress in Sheet -->
@@ -2619,13 +2799,13 @@
       </div>
 
       <div class="sheet-controls">
-        <button class="sheet-btn" id="sheetPrevBtn" title="&#3626;&#3606;&#3634;&#3609;&#3637;/&#3605;&#3629;&#3609;&#3585;&#3656;&#3629;&#3609;&#3627;&#3609;&#3657;&#3634;">
+        <button class="sheet-btn" id="sheetPrevBtn" title="Previous">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
         </button>
-        <button class="sheet-btn play-pause" id="sheetPlayBtn" title="&#3648;&#3621;&#3656;&#3609;/&#3627;&#3618;&#3640;&#3604;">
+        <button class="sheet-btn play-pause" id="sheetPlayBtn" title="Play / Pause">
           <svg id="sheetPlayIconSvg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <button class="sheet-btn" id="sheetNextBtn" title="&#3626;&#3606;&#3634;&#3609;&#3637;/&#3605;&#3629;&#3609;&#3606;&#3633;&#3604;&#3652;&#3611;">
+        <button class="sheet-btn" id="sheetNextBtn" title="Next">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
         </button>
       </div>
@@ -4373,99 +4553,146 @@ const GHOST_EPISODES = [
     currentYtChannel = chan;
     currentGhostCat = (chan === 'cloudsphere') ? 'general' : 'latest';
 
-    // Update Showcase Show Cards
-    const cardGhost = document.getElementById('showCardGhost');
-    const cardGungun = document.getElementById('showCardGungun');
-    const cardCloud = document.getElementById('showCardCloud');
-    const statusGhost = cardGhost ? cardGhost.querySelector('.status-text') : null;
-    const statusGungun = cardGungun ? cardGungun.querySelector('.status-text') : null;
-    const statusCloud = cardCloud ? cardCloud.querySelector('.status-text') : null;
+    // 1. Update Channel Switcher Pills
+    const pillGhost = document.getElementById('ytPillGhost');
+    const pillGungun = document.getElementById('ytPillGungun');
+    const pillCloud = document.getElementById('ytPillCloud');
+    if (pillGhost) pillGhost.classList.toggle('active', chan === 'ghost');
+    if (pillGungun) pillGungun.classList.toggle('active', chan === 'gungun');
+    if (pillCloud) pillCloud.classList.toggle('active', chan === 'cloudsphere');
 
+    // 2. Update Bento Header Details
+    const bentoLogo = document.getElementById('ytBentoLogo');
+    const bentoTitle = document.getElementById('ytBentoTitle');
+    const bentoSub = document.getElementById('ytBentoSub');
+    const bentoPlayTxt = document.getElementById('ytBentoPlayTxt');
+
+    if (chan === 'gungun') {
+      if (bentoLogo) bentoLogo.src = (typeof GUNGUN_LOGO !== 'undefined' ? GUNGUN_LOGO : getChannelLogo({ channel: 'gungun' }));
+      if (bentoTitle) bentoTitle.textContent = 'GUN GUN';
+      if (bentoSub) bentoSub.textContent = 'DJ Wav Sessions - House & Groove';
+      if (bentoPlayTxt) bentoPlayTxt.textContent = 'Play Mixes';
+    } else if (chan === 'cloudsphere') {
+      if (bentoLogo) bentoLogo.src = (typeof CLOUDSPHERE_LOGO !== 'undefined' ? CLOUDSPHERE_LOGO : getChannelLogo({ channel: 'cloudsphere' }));
+      if (bentoTitle) bentoTitle.textContent = 'CLOUDSPHERE';
+      if (bentoSub) bentoSub.textContent = 'Japanese Stories & Urban Legends';
+      if (bentoPlayTxt) bentoPlayTxt.textContent = 'Play Stories';
+    } else {
+      if (bentoLogo) bentoLogo.src = (typeof GHOST_LOGO !== 'undefined' ? GHOST_LOGO : getChannelLogo({ channel: 'ghost' }));
+      if (bentoTitle) bentoTitle.textContent = 'The Ghost Radio';
+      if (bentoSub) bentoSub.textContent = 'Live Ghost Stories & Supernatural';
+      if (bentoPlayTxt) bentoPlayTxt.textContent = 'Listen Live';
+    }
+
+    // 3. Switch Subcategory Tabs
     const tabsGhost = document.getElementById('tabsGhost');
     const tabsGungun = document.getElementById('tabsGungun');
     const tabsCloud = document.getElementById('tabsCloud');
-
-    if (cardGhost) cardGhost.classList.toggle('active', chan === 'ghost');
-    if (cardGungun) cardGungun.classList.toggle('active', chan === 'gungun');
-    if (cardCloud) cardCloud.classList.toggle('active', chan === 'cloudsphere');
-
-    const txtSelected = '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E40\u0E25\u0E37\u0E2D\u0E01'; // \u0e40\u0e18\u0081\u0e40\u0e18\u0e13\u0e40\u0e18\u0e05\u0e40\u0e18\u0e11\u0e40\u0e18\u0087\u0e40\u0e19\u20ac\u0e40\u0e18\u0e05\u0e40\u0e18\u0e17\u0e40\u0e18\u0e0d\u0e40\u0e18\u0081
-    const txtPick = '\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1F\u0E31\u0E07\u0E0A\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49'; // \u0e40\u0e19\u20ac\u0e40\u0e18\u0e05\u0e40\u0e18\u0e17\u0e40\u0e18\u0e0d\u0e40\u0e18\u0081\u0e40\u0e18\u009f\u0e40\u0e18\u0e11\u0e40\u0e18\u0087\u0e40\u0e18\u008a\u0e40\u0e19\u0088\u0e40\u0e18\u0e0d\u0e40\u0e18\u0087\u0e40\u0e18\u0099\u0e40\u0e18\u0e15\u0e40\u0e19\u0089
-
-    if (statusGhost) statusGhost.textContent = (chan === 'ghost') ? txtSelected : txtPick;
-    if (statusGungun) statusGungun.textContent = (chan === 'gungun') ? txtSelected : txtPick;
-    if (statusCloud) statusCloud.textContent = (chan === 'cloudsphere') ? txtSelected : txtPick;
-
     if (tabsGhost) tabsGhost.style.display = (chan === 'ghost') ? 'flex' : 'none';
     if (tabsGungun) tabsGungun.style.display = (chan === 'gungun') ? 'flex' : 'none';
     if (tabsCloud) tabsCloud.style.display = (chan === 'cloudsphere') ? 'flex' : 'none';
 
-    // Activate first tab button of chosen channel
+    // Activate the first tab in the active group
     const activeGroup = (chan === 'ghost') ? tabsGhost : ((chan === 'gungun') ? tabsGungun : tabsCloud);
     if (activeGroup) {
       activeGroup.querySelectorAll('.ghost-tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
     }
 
-    const grid = document.getElementById('ghostEpisodeGrid');
-    if (grid) grid.scrollLeft = 0;
     renderGhostEpisodes();
+  }
+
+  function playCurrentChannelLive() {
+    const list = getFilteredGhostEpisodes();
+    if (list && list.length > 0) {
+      playGhostEpisode(list[0]);
+    } else {
+      const allChan = (window.ghostEpisodesList || GHOST_EPISODES).filter(e => (e.channel || 'ghost') === currentYtChannel);
+      if (allChan.length > 0) playGhostEpisode(allChan[0]);
+    }
   }
 
   function renderGhostEpisodes() {
     const grid = document.getElementById('ghostEpisodeGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     const list = getFilteredGhostEpisodes();
 
+    if (!list || list.length === 0) {
+      grid.innerHTML = '<div style="padding: 30px 10px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">No episodes found in this category.</div>';
+      return;
+    }
+
     list.forEach(ep => {
       const card = document.createElement('div');
-      const isThisPlaying = (isYtMode && currentGhostEpisode.id === ep.id);
-      card.className = 'episode-card' + (isThisPlaying ? ' playing' : '');
+      const isThisPlaying = (isYtMode && currentGhostEpisode && currentGhostEpisode.id === ep.id);
+      card.className = 'episode-card' + (isThisPlaying ? ' active' : '');
 
+      // 1. Artwork wrap (52x52px)
       const thumbWrap = document.createElement('div');
-      thumbWrap.className = 'episode-thumb-wrap';
+      thumbWrap.className = 'card-art-wrap';
 
       const img = document.createElement('img');
-      img.className = 'episode-thumb';
+      img.className = 'card-art';
       img.src = 'https://i.ytimg.com/vi/' + ep.id + '/mqdefault.jpg';
-      img.alt = ep.title;
+      img.alt = ep.title || '';
       img.loading = 'lazy';
       img.onerror = () => { img.src = getChannelLogo(ep); };
-
-      const tag = document.createElement('span');
-      tag.className = 'episode-tag-badge';
-      tag.textContent = ep.tag || (ep.cat === 'alltime' ? TXT_TAG_ALLTIME : ep.cat === 'yearly' ? TXT_TAG_YEARLY : TXT_TAG_POPULAR);
-
-      const playBtn = document.createElement('div');
-      playBtn.className = 'episode-play-btn';
-      playBtn.innerHTML = isThisPlaying && isPlaying ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-
       thumbWrap.appendChild(img);
-      thumbWrap.appendChild(tag);
-      thumbWrap.appendChild(playBtn);
 
-      const info = document.createElement('div');
-      info.className = 'episode-info';
+      // Equalizer bars overlay when playing
+      const eqOverlay = document.createElement('div');
+      eqOverlay.className = 'eq-overlay';
+      eqOverlay.innerHTML = '<div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>';
+      thumbWrap.appendChild(eqOverlay);
 
-      const title = document.createElement('div');
-      title.className = 'episode-title';
-      title.textContent = ep.title;
-      title.title = ep.title;
+      // 2. Metadata (Title, Badges, Date/Channel)
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
 
-      const author = document.createElement('div');
-      author.className = 'episode-author';
-      author.textContent = ep.author;
-      author.title = ep.author;
+      const nameRow = document.createElement('div');
+      nameRow.className = 'card-name-row';
 
-      const dateEl = document.createElement('div');
-      dateEl.className = 'episode-date';
-      dateEl.textContent = ep.date || '';
+      const title = document.createElement('span');
+      title.className = 'card-name';
+      title.textContent = ep.title || 'Untitled Episode';
+      title.title = ep.title || '';
+      nameRow.appendChild(title);
 
-      info.appendChild(title);
-      info.appendChild(author);
-      if (ep.date) info.appendChild(dateEl);
+      const badgesRow = document.createElement('div');
+      badgesRow.className = 'card-badges-row';
+
+      const chanBadge = document.createElement('span');
+      chanBadge.className = 'badge-group';
+      chanBadge.textContent = getChannelTitle(ep);
+      badgesRow.appendChild(chanBadge);
+
+      if (ep.tag) {
+        const tagBadge = document.createElement('span');
+        tagBadge.className = 'badge-genre';
+        tagBadge.textContent = ep.tag;
+        badgesRow.appendChild(tagBadge);
+      }
+
+      const dateRow = document.createElement('div');
+      dateRow.className = 'card-track';
+      const authorText = (ep.author && ep.author !== getChannelTitle(ep)) ? (ep.author + (ep.date ? ' - ' : '')) : '';
+      dateRow.textContent = authorText + (ep.date || 'Audio Stream');
+
+      meta.appendChild(nameRow);
+      meta.appendChild(badgesRow);
+      meta.appendChild(dateRow);
+
+      // 3. Play button (Right 38px circle)
+      const playBtn = document.createElement('button');
+      playBtn.className = 'card-play-btn';
+      playBtn.setAttribute('aria-label', isThisPlaying && isPlaying ? 'Pause' : 'Play');
+      playBtn.innerHTML = (isThisPlaying && isPlaying)
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 
       card.appendChild(thumbWrap);
-      card.appendChild(info);
+      card.appendChild(meta);
+      card.appendChild(playBtn);
 
       card.onclick = () => {
         if (isThisPlaying && isPlaying) {
@@ -4646,13 +4873,16 @@ const GHOST_EPISODES = [
     const ghostSec = document.getElementById('ghostShowSection');
     if (currentGroup === 'Ghost') {
       container.style.display = 'none';
-      if (ghostSec) ghostSec.style.display = 'block';
+      if (ghostSec) {
+        ghostSec.style.display = 'block';
+        switchYtChannel(currentYtChannel);
+      }
       return;
     }
 
     container.style.display = 'block';
     if (ghostSec) {
-      ghostSec.style.display = (currentGroup === 'All') ? 'block' : 'none';
+      ghostSec.style.display = 'none';
     }
 
     const thaiStations = STATIONS.filter(s => s.group === 'Thai');
