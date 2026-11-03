@@ -2656,6 +2656,12 @@
 
     <!-- DEDICATED THE GHOST RADIO SHOW & EPISODES SECTION -->
     <section class="ghost-section" id="ghostShowSection" style="display: none;">
+      <!-- YouTube Audio Section Header -->
+      <div class="group-header" id="ghostSectionHeader" style="margin-bottom: 14px;">
+        <h2 class="group-title">YouTube Audio</h2>
+        <span class="group-badge">3 Channels</span>
+      </div>
+
       <!-- YouTube Channel Pills Switcher -->
       <div class="yt-channel-tabs" id="ytChannelTabs">
         <button class="yt-channel-chip active" id="ytPillGhost" onclick="switchYtChannel('ghost')">
@@ -4858,8 +4864,8 @@ const GHOST_EPISODES = [
     card.appendChild(btn);
 
     card.onclick = (e) => {
-      if (selectedRadio.id === s.id && !isYtMode) {
-        (isPlaying || !audio.paused) ? stopAudio() : startAudio();
+      if (selectedRadio.id === s.id && !isYtMode && (isPlaying || !audio.paused)) {
+        stopAudio();
       } else {
         selectRadioStation(s, true);
       }
@@ -4884,7 +4890,12 @@ const GHOST_EPISODES = [
 
     container.style.display = 'block';
     if (ghostSec) {
-      ghostSec.style.display = 'none';
+      if (currentGroup === 'All') {
+        ghostSec.style.display = 'block';
+        switchYtChannel(currentYtChannel);
+      } else {
+        ghostSec.style.display = 'none';
+      }
     }
 
     const thaiStations = STATIONS.filter(s => s.group === 'Thai');
@@ -4893,9 +4904,14 @@ const GHOST_EPISODES = [
     const sections = [];
     if (currentGroup === 'All') {
       sections.push({
-        title: 'All Stations',
-        badge: STATIONS.length + ' Stations',
-        stations: STATIONS
+        title: 'Thai Radio',
+        badge: thaiStations.length + ' Stations',
+        stations: thaiStations
+      });
+      sections.push({
+        title: 'Global Radio',
+        badge: globalStations.length + ' Stations',
+        stations: globalStations
       });
     } else if (currentGroup === 'Thai') {
       sections.push({
@@ -5807,7 +5823,17 @@ const GHOST_EPISODES = [
   }
 
   // Bottom Player Controls
-  document.getElementById('playBtn').onclick = () => isPlaying ? stopAudio() : startAudio();
+  document.getElementById('playBtn').onclick = () => {
+    if (isPlaying) {
+      stopAudio();
+    } else {
+      if (!isYtMode && !hasPlaybackStarted) {
+        selectRadioStation(selectedRadio, true);
+      } else {
+        startAudio();
+      }
+    }
+  };
   document.getElementById('retryBtn').onclick = startAudio;
 
   document.getElementById('prevBtn').onclick = () => {
