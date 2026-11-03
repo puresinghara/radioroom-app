@@ -2268,152 +2268,98 @@
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
     }
 
-    /* YouTube Channel Switcher Pills */
-    .yt-channel-tabs {
-      display: flex !important;
-      gap: 8px !important;
-      overflow-x: auto !important;
-      padding: 4px 0 10px 0 !important;
-      scrollbar-width: none !important;
-      -webkit-overflow-scrolling: touch !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    .yt-channel-tabs::-webkit-scrollbar { display: none; }
-
-    .yt-channel-chip {
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 6px !important;
-      padding: 6px 14px !important;
-      border-radius: 18px !important;
-      background: rgba(255, 255, 255, 0.05) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: rgba(255, 255, 255, 0.85) !important;
-      font-size: 0.78rem !important;
-      font-weight: 600 !important;
-      cursor: pointer !important;
-      white-space: nowrap !important;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-      font-family: inherit !important;
-    }
-    .yt-channel-chip:hover {
-      background: rgba(255, 255, 255, 0.1) !important;
-      color: #fff !important;
-    }
-    .yt-channel-chip.active {
-      background: #00e676 !important;
-      color: #000 !important;
-      border-color: #00e676 !important;
-      box-shadow: 0 4px 14px rgba(0, 230, 118, 0.28) !important;
-      font-weight: 700 !important;
-    }
-    .yt-chip-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    /* YouTube Channel Bento Header */
-    .yt-channel-bento {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      gap: 10px !important;
-      padding: 10px 12px !important;
-      border-radius: 16px !important;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      margin-bottom: 10px !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
-      overflow: hidden !important;
-    }
-    .yt-bento-left {
-      display: flex !important;
-      align-items: center !important;
-      gap: 10px !important;
-      flex: 1 1 0% !important;
-      min-width: 0 !important;
-      overflow: hidden !important;
-    }
-    .yt-bento-art {
-      width: 44px !important;
-      height: 44px !important;
-      min-width: 44px !important;
-      max-width: 44px !important;
-      border-radius: 10px !important;
-      object-fit: cover !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      flex-shrink: 0 !important;
-    }
-    .yt-bento-meta {
+    /* YouTube Channel Accordion Cards & Drawers */
+    .yt-channels-container {
       display: flex !important;
       flex-direction: column !important;
-      gap: 2px !important;
-      min-width: 0 !important;
-      flex: 1 1 0% !important;
-      overflow: hidden !important;
+      gap: 10px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
     }
-    .yt-bento-title-row {
+    .yt-channel-card {
+      cursor: pointer !important;
+      user-select: none !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .yt-channel-card.expanded {
+      border-color: var(--sp-green) !important;
+      background: var(--sp-card-active) !important;
+      box-shadow: 0 4px 18px rgba(0, 230, 118, 0.15) !important;
+    }
+    .yt-expand-indicator {
       display: flex !important;
       align-items: center !important;
-      gap: 6px !important;
-      min-width: 0 !important;
-      overflow: hidden !important;
+      justify-content: center !important;
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: var(--sp-subtext) !important;
+      transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease !important;
+      flex-shrink: 0 !important;
     }
-    .yt-bento-title {
-      font-size: 0.9rem !important;
-      font-weight: 700 !important;
+    .yt-channel-card:hover .yt-expand-indicator {
+      background: rgba(255, 255, 255, 0.16) !important;
       color: #fff !important;
-      margin: 0 !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
     }
-    .yt-bento-status-pill {
-      font-size: 0.6rem !important;
-      font-weight: 700 !important;
-      color: #00e676 !important;
-      background: rgba(0, 230, 118, 0.14) !important;
-      padding: 1px 6px !important;
-      border-radius: 8px !important;
-      white-space: nowrap !important;
-      flex-shrink: 0 !important;
+    .yt-channel-card.expanded .yt-expand-indicator {
+      background: var(--sp-green) !important;
+      color: #000 !important;
+      transform: rotate(180deg) !important;
     }
-    .yt-bento-sub {
-      font-size: 0.7rem !important;
-      color: rgba(255, 255, 255, 0.55) !important;
-      margin: 0 !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
+    .chevron-icon {
+      width: 22px !important;
+      height: 22px !important;
+      fill: currentColor !important;
     }
-    .yt-bento-right {
-      flex-shrink: 0 !important;
+    .yt-channel-drawer {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 16px !important;
+      padding: 12px !important;
+      margin-top: -4px !important;
+      margin-bottom: 8px !important;
+      display: flex;
+      flex-direction: column !important;
+      gap: 12px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
     }
-    .yt-bento-play-btn {
+    .drawer-header-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      overflow-x: auto !important;
+      padding-bottom: 2px !important;
+      scrollbar-width: none !important;
+    }
+    .drawer-header-row::-webkit-scrollbar { display: none; }
+    .drawer-live-btn {
       display: inline-flex !important;
       align-items: center !important;
       gap: 5px !important;
-      background: #00e676 !important;
+      background: var(--sp-green) !important;
       color: #000 !important;
-      border: none !important;
-      border-radius: 14px !important;
-      padding: 6px 11px !important;
-      font-size: 0.72rem !important;
       font-weight: 700 !important;
+      font-size: 0.74rem !important;
+      padding: 6px 14px !important;
+      border-radius: 18px !important;
+      border: none !important;
       cursor: pointer !important;
       white-space: nowrap !important;
-      transition: transform 0.15s ease, background 0.2s ease !important;
-      font-family: inherit !important;
+      flex-shrink: 0 !important;
+      transition: all 0.2s ease !important;
     }
-    .yt-bento-play-btn:active {
+    .drawer-live-btn:hover {
+      transform: scale(1.03) !important;
+    }
+    .drawer-live-btn:active {
       transform: scale(0.96) !important;
+    }
+    .tag-yt {
+      background: rgba(29, 185, 84, 0.16) !important;
+      color: #1db954 !important;
+      border: 1px solid rgba(29, 185, 84, 0.3) !important;
     }
 
     /* Subcategory Filter Tabs (Pills) */
@@ -2662,62 +2608,117 @@
         <span class="group-badge">3 Channels</span>
       </div>
 
-      <!-- YouTube Channel Pills Switcher -->
-      <div class="yt-channel-tabs" id="ytChannelTabs">
-        <button class="yt-channel-chip active" id="ytPillGhost" onclick="switchYtChannel('ghost')">
-          <span class="yt-chip-dot"></span> The Ghost Radio
-        </button>
-        <button class="yt-channel-chip" id="ytPillGungun" onclick="switchYtChannel('gungun')">
-          <span class="yt-chip-dot"></span> GUN GUN
-        </button>
-        <button class="yt-channel-chip" id="ytPillCloud" onclick="switchYtChannel('cloudsphere')">
-          <span class="yt-chip-dot"></span> CLOUDSPHERE
-        </button>
-      </div>
-
-      <!-- YouTube Channel Bento Header Card -->
-      <div class="yt-channel-bento" id="ytChannelBento">
-        <div class="yt-bento-left">
-          <img id="ytBentoLogo" src="" alt="Channel Logo" class="yt-bento-art">
-          <div class="yt-bento-meta">
-            <div class="yt-bento-title-row">
-              <h3 class="yt-bento-title" id="ytBentoTitle">The Ghost Radio</h3>
-              <span class="yt-bento-status-pill" id="ytBentoStatus">&#9679; ACTIVE</span>
+      <!-- Channel Cards + Expand Drawers Container -->
+      <div class="yt-channels-container" id="ytChannelsContainer">
+        <!-- The Ghost Radio -->
+        <div class="station-card yt-channel-card" id="ytCard-ghost" onclick="toggleYtChannelExpand('ghost')">
+          <div class="card-art-wrap">
+            <img id="ytCardArt-ghost" src="" alt="The Ghost Radio" class="card-art">
+            <div class="card-wave">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
             </div>
-            <p class="yt-bento-sub" id="ytBentoSub">Live Ghost Stories &amp; Supernatural</p>
+          </div>
+          <div class="card-meta">
+            <div class="card-name-row">
+              <div class="card-name">The Ghost Radio</div>
+              <span class="card-tag tag-yt">YOUTUBE</span>
+            </div>
+            <div class="card-track">Live Ghost Stories &bull; Supernatural Episodes</div>
+          </div>
+          <div class="yt-expand-indicator" id="ytExpand-ghost" title="Expand Episodes">
+            <svg class="chevron-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
           </div>
         </div>
-        <div class="yt-bento-right">
-          <button class="yt-bento-play-btn" id="ytBentoPlayBtn" onclick="playCurrentChannelLive()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            <span id="ytBentoPlayTxt">Listen Live</span>
-          </button>
+        <div class="yt-channel-drawer" id="ytDrawer-ghost" style="display: none;">
+          <div class="drawer-header-row">
+            <button class="drawer-live-btn" onclick="playCurrentChannelLive()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span>Listen Live</span>
+            </button>
+            <div class="ghost-tabs" id="tabsGhost">
+              <button class="ghost-tab-btn active" data-cat="latest">Latest (20)</button>
+              <button class="ghost-tab-btn" data-cat="monthly">This Month (10)</button>
+              <button class="ghost-tab-btn" data-cat="yearly">Best of 2026 (10)</button>
+              <button class="ghost-tab-btn" data-cat="alltime">Classic (10)</button>
+            </div>
+          </div>
+          <div class="episode-grid" id="ghostEpisodeGrid-ghost"></div>
         </div>
-      </div>
 
-      <!-- Episode Filter Tabs for The Ghost Radio -->
-      <div class="ghost-tabs" id="tabsGhost">
-        <button class="ghost-tab-btn active" data-cat="latest">Latest Episodes (20)</button>
-        <button class="ghost-tab-btn" data-cat="monthly">This Month (10)</button>
-        <button class="ghost-tab-btn" data-cat="yearly">Best of 2026 (10)</button>
-        <button class="ghost-tab-btn" data-cat="alltime">All-Time Classic (10)</button>
-      </div>
+        <!-- GUN GUN -->
+        <div class="station-card yt-channel-card" id="ytCard-gungun" onclick="toggleYtChannelExpand('gungun')">
+          <div class="card-art-wrap">
+            <img id="ytCardArt-gungun" src="" alt="GUN GUN" class="card-art">
+            <div class="card-wave">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <div class="card-name-row">
+              <div class="card-name">GUN GUN</div>
+              <span class="card-tag tag-yt">YOUTUBE</span>
+            </div>
+            <div class="card-track">Deep House &bull; Chill DJ Mixes</div>
+          </div>
+          <div class="yt-expand-indicator" id="ytExpand-gungun" title="Expand Episodes">
+            <svg class="chevron-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          </div>
+        </div>
+        <div class="yt-channel-drawer" id="ytDrawer-gungun" style="display: none;">
+          <div class="drawer-header-row">
+            <button class="drawer-live-btn" onclick="playCurrentChannelLive()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span>Play Mixes</span>
+            </button>
+            <div class="ghost-tabs" id="tabsGungun">
+              <button class="ghost-tab-btn active" data-cat="latest">Latest Mixes (20)</button>
+              <button class="ghost-tab-btn" data-cat="popular">Popular (20)</button>
+            </div>
+          </div>
+          <div class="episode-grid" id="ghostEpisodeGrid-gungun"></div>
+        </div>
 
-      <!-- Episode Filter Tabs for GUN GUN -->
-      <div class="ghost-tabs" id="tabsGungun" style="display: none;">
-        <button class="ghost-tab-btn active" data-cat="latest">Latest Mixes (20)</button>
-        <button class="ghost-tab-btn" data-cat="popular">Most Popular (20)</button>
-      </div>
-
-      <!-- Episode Filter Tabs for CLOUDSPHERE -->
-      <div class="ghost-tabs" id="tabsCloud" style="display: none;">
-        <button class="ghost-tab-btn active" data-cat="general">General Stories (20)</button>
-        <button class="ghost-tab-btn" data-cat="spooky">Spooky Stories (20)</button>
-      </div>
-
-      <!-- Episodes List (Single Column Horizontal Cards matching Radio style) -->
-      <div class="episode-list-container">
-        <div class="episode-grid" id="ghostEpisodeGrid"></div>
+        <!-- CLOUDSPHERE -->
+        <div class="station-card yt-channel-card" id="ytCard-cloudsphere" onclick="toggleYtChannelExpand('cloudsphere')">
+          <div class="card-art-wrap">
+            <img id="ytCardArt-cloudsphere" src="" alt="CLOUDSPHERE" class="card-art">
+            <div class="card-wave">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <div class="card-name-row">
+              <div class="card-name">CLOUDSPHERE</div>
+              <span class="card-tag tag-yt">YOUTUBE</span>
+            </div>
+            <div class="card-track">Atmospheric Mystery &bull; Ghost Audio</div>
+          </div>
+          <div class="yt-expand-indicator" id="ytExpand-cloudsphere" title="Expand Episodes">
+            <svg class="chevron-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          </div>
+        </div>
+        <div class="yt-channel-drawer" id="ytDrawer-cloudsphere" style="display: none;">
+          <div class="drawer-header-row">
+            <button class="drawer-live-btn" onclick="playCurrentChannelLive()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span>Play Stories</span>
+            </button>
+            <div class="ghost-tabs" id="tabsCloud">
+              <button class="ghost-tab-btn active" data-cat="general">General (20)</button>
+              <button class="ghost-tab-btn" data-cat="spooky">Spooky (20)</button>
+            </div>
+          </div>
+          <div class="episode-grid" id="ghostEpisodeGrid-cloudsphere"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -4211,6 +4212,7 @@ const GHOST_EPISODES = [
 
   // YouTube / Ghost Radio State
   let currentYtChannel = 'ghost'; // 'ghost' or 'gungun'
+  let expandedYtChannel = null;
   let currentGhostCat = 'latest';
   let currentGhostEpisode = GHOST_EPISODES[0];
   let ytPlayer = null;
@@ -4274,6 +4276,13 @@ const GHOST_EPISODES = [
   }
 
   // Set Ghost, Gun Gun & CloudSphere showcase covers
+  const artGhost = document.getElementById('ytCardArt-ghost');
+  if (artGhost && typeof GHOST_LOGO !== 'undefined') artGhost.src = GHOST_LOGO;
+  const artGungun = document.getElementById('ytCardArt-gungun');
+  if (artGungun && typeof GUNGUN_LOGO !== 'undefined') artGungun.src = GUNGUN_LOGO;
+  const artCloud = document.getElementById('ytCardArt-cloudsphere');
+  if (artCloud && typeof CLOUDSPHERE_LOGO !== 'undefined') artCloud.src = CLOUDSPHERE_LOGO;
+
   const coverGhost = document.getElementById('showCoverGhost');
   if (coverGhost && typeof GHOST_LOGO !== 'undefined') coverGhost.src = GHOST_LOGO;
   const coverGungun = document.getElementById('showCoverGungun');
@@ -4557,56 +4566,44 @@ const GHOST_EPISODES = [
     });
   }
 
-  function switchYtChannel(chan) {
-    currentYtChannel = chan;
-    currentGhostCat = (chan === 'cloudsphere') ? 'general' : 'latest';
-
-    // 1. Update Channel Switcher Pills
-    const pillGhost = document.getElementById('ytPillGhost');
-    const pillGungun = document.getElementById('ytPillGungun');
-    const pillCloud = document.getElementById('ytPillCloud');
-    if (pillGhost) pillGhost.classList.toggle('active', chan === 'ghost');
-    if (pillGungun) pillGungun.classList.toggle('active', chan === 'gungun');
-    if (pillCloud) pillCloud.classList.toggle('active', chan === 'cloudsphere');
-
-    // 2. Update Bento Header Details
-    const bentoLogo = document.getElementById('ytBentoLogo');
-    const bentoTitle = document.getElementById('ytBentoTitle');
-    const bentoSub = document.getElementById('ytBentoSub');
-    const bentoPlayTxt = document.getElementById('ytBentoPlayTxt');
-
-    if (chan === 'gungun') {
-      if (bentoLogo) bentoLogo.src = (typeof GUNGUN_LOGO !== 'undefined' ? GUNGUN_LOGO : getChannelLogo({ channel: 'gungun' }));
-      if (bentoTitle) bentoTitle.textContent = 'GUN GUN';
-      if (bentoSub) bentoSub.textContent = 'DJ Wav Sessions - House & Groove';
-      if (bentoPlayTxt) bentoPlayTxt.textContent = 'Play Mixes';
-    } else if (chan === 'cloudsphere') {
-      if (bentoLogo) bentoLogo.src = (typeof CLOUDSPHERE_LOGO !== 'undefined' ? CLOUDSPHERE_LOGO : getChannelLogo({ channel: 'cloudsphere' }));
-      if (bentoTitle) bentoTitle.textContent = 'CLOUDSPHERE';
-      if (bentoSub) bentoSub.textContent = 'Japanese Stories & Urban Legends';
-      if (bentoPlayTxt) bentoPlayTxt.textContent = 'Play Stories';
+  function toggleYtChannelExpand(chan) {
+    if (expandedYtChannel === chan) {
+      expandedYtChannel = null;
     } else {
-      if (bentoLogo) bentoLogo.src = (typeof GHOST_LOGO !== 'undefined' ? GHOST_LOGO : getChannelLogo({ channel: 'ghost' }));
-      if (bentoTitle) bentoTitle.textContent = 'The Ghost Radio';
-      if (bentoSub) bentoSub.textContent = 'Live Ghost Stories & Supernatural';
-      if (bentoPlayTxt) bentoPlayTxt.textContent = 'Listen Live';
+      expandedYtChannel = chan;
+      currentYtChannel = chan;
+      currentGhostCat = (chan === 'cloudsphere') ? 'general' : 'latest';
     }
+    syncYtDrawers();
+  }
+  window.toggleYtChannelExpand = toggleYtChannelExpand;
 
-    // 3. Switch Subcategory Tabs
-    const tabsGhost = document.getElementById('tabsGhost');
-    const tabsGungun = document.getElementById('tabsGungun');
-    const tabsCloud = document.getElementById('tabsCloud');
-    if (tabsGhost) tabsGhost.style.display = (chan === 'ghost') ? 'flex' : 'none';
-    if (tabsGungun) tabsGungun.style.display = (chan === 'gungun') ? 'flex' : 'none';
-    if (tabsCloud) tabsCloud.style.display = (chan === 'cloudsphere') ? 'flex' : 'none';
+  function syncYtDrawers() {
+    ['ghost', 'gungun', 'cloudsphere'].forEach(ch => {
+      const card = document.getElementById('ytCard-' + ch);
+      const drawer = document.getElementById('ytDrawer-' + ch);
+      const isExp = (expandedYtChannel === ch);
 
-    // Activate the first tab in the active group
-    const activeGroup = (chan === 'ghost') ? tabsGhost : ((chan === 'gungun') ? tabsGungun : tabsCloud);
-    if (activeGroup) {
-      activeGroup.querySelectorAll('.ghost-tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+      if (card) {
+        card.classList.toggle('expanded', isExp);
+        const isChanPlaying = (isYtMode && isPlaying && (currentGhostEpisode.channel || 'ghost') === ch);
+        card.classList.toggle('playing', isChanPlaying);
+      }
+      if (drawer) {
+        drawer.style.display = isExp ? 'flex' : 'none';
+      }
+    });
+
+    if (expandedYtChannel) {
+      const tabsId = (expandedYtChannel === 'ghost') ? 'tabsGhost' : ((expandedYtChannel === 'gungun') ? 'tabsGungun' : 'tabsCloud');
+      const tabsEl = document.getElementById(tabsId);
+      if (tabsEl) {
+        tabsEl.querySelectorAll('.ghost-tab-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.cat === currentGhostCat);
+        });
+      }
+      renderGhostEpisodes();
     }
-
-    renderGhostEpisodes();
   }
 
   function playCurrentChannelLive() {
@@ -4620,13 +4617,15 @@ const GHOST_EPISODES = [
   }
 
   function renderGhostEpisodes() {
-    const grid = document.getElementById('ghostEpisodeGrid');
+    const ch = expandedYtChannel || currentYtChannel;
+    if (!ch) return;
+    const grid = document.getElementById('ghostEpisodeGrid-' + ch);
     if (!grid) return;
     grid.innerHTML = '';
     const list = getFilteredGhostEpisodes();
 
     if (!list || list.length === 0) {
-      grid.innerHTML = '<div style="padding: 30px 10px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">No episodes found in this category.</div>';
+      grid.innerHTML = '<div style="padding: 24px 10px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">No episodes found in this category.</div>';
       return;
     }
 
@@ -4698,6 +4697,15 @@ const GHOST_EPISODES = [
         ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
         : '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 
+      playBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (isThisPlaying && isPlaying) {
+          stopAudio();
+        } else {
+          playGhostEpisode(ep);
+        }
+      };
+
       card.appendChild(thumbWrap);
       card.appendChild(meta);
       card.appendChild(playBtn);
@@ -4716,12 +4724,14 @@ const GHOST_EPISODES = [
 
   // Ghost Tabs & Carousel Navigation
   document.querySelectorAll('.ghost-tab-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.ghost-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const parentTabs = btn.closest('.ghost-tabs');
+      if (parentTabs) {
+        parentTabs.querySelectorAll('.ghost-tab-btn').forEach(b => b.classList.remove('active'));
+      }
       btn.classList.add('active');
       currentGhostCat = btn.dataset.cat;
-      const grid = document.getElementById('ghostEpisodeGrid');
-      if (grid) grid.scrollLeft = 0;
       renderGhostEpisodes();
     };
   });
@@ -4883,7 +4893,8 @@ const GHOST_EPISODES = [
       container.style.display = 'none';
       if (ghostSec) {
         ghostSec.style.display = 'block';
-        switchYtChannel(currentYtChannel);
+        if (!expandedYtChannel) expandedYtChannel = 'ghost';
+        syncYtDrawers();
       }
       return;
     }
@@ -4892,7 +4903,7 @@ const GHOST_EPISODES = [
     if (ghostSec) {
       if (currentGroup === 'All') {
         ghostSec.style.display = 'block';
-        switchYtChannel(currentYtChannel);
+        syncYtDrawers();
       } else {
         ghostSec.style.display = 'none';
       }
@@ -5047,6 +5058,7 @@ const GHOST_EPISODES = [
         window.AndroidBridge.updateMedia(t, s, isPlaying, art);
       } catch(e) {}
     }
+    syncYtDrawers();
   }
 
   function cleanup() {
