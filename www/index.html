@@ -2325,33 +2325,29 @@
       box-sizing: border-box !important;
       width: 100% !important;
     }
-    .drawer-header-row {
-      display: flex !important;
-      align-items: center !important;
-      gap: 10px !important;
-      overflow-x: auto !important;
-      padding-bottom: 2px !important;
-      scrollbar-width: none !important;
-    }
-    .drawer-header-row::-webkit-scrollbar { display: none; }
     .drawer-live-btn {
       display: inline-flex !important;
       align-items: center !important;
+      justify-content: center !important;
       gap: 5px !important;
       background: var(--sp-green) !important;
       color: #000 !important;
       font-weight: 700 !important;
       font-size: 0.74rem !important;
-      padding: 6px 14px !important;
-      border-radius: 18px !important;
-      border: none !important;
+      padding: 0 14px !important;
+      height: 32px !important;
+      border-radius: 16px !important;
+      border: 1px solid var(--sp-green) !important;
       cursor: pointer !important;
       white-space: nowrap !important;
       flex-shrink: 0 !important;
+      box-sizing: border-box !important;
+      line-height: 1 !important;
       transition: all 0.2s ease !important;
     }
     .drawer-live-btn:hover {
-      transform: scale(1.03) !important;
+      background: #1ed760 !important;
+      transform: scale(1.02) !important;
     }
     .drawer-live-btn:active {
       transform: scale(0.96) !important;
@@ -2364,10 +2360,14 @@
 
     /* Subcategory Filter Tabs (Pills) */
     .ghost-tabs {
-      display: flex;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
       gap: 8px !important;
       overflow-x: auto !important;
-      padding: 2px 0 10px 0 !important;
+      padding: 2px 0 6px 0 !important;
+      margin: 0 !important;
       scrollbar-width: none !important;
       -webkit-overflow-scrolling: touch !important;
       width: 100% !important;
@@ -2376,7 +2376,11 @@
     .ghost-tabs::-webkit-scrollbar { display: none; }
 
     .ghost-tab-btn {
-      padding: 5px 12px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 14px !important;
+      height: 32px !important;
       background: rgba(255, 255, 255, 0.05) !important;
       border: 1px solid rgba(255, 255, 255, 0.09) !important;
       border-radius: 16px !important;
@@ -2386,6 +2390,9 @@
       cursor: pointer !important;
       white-space: nowrap !important;
       font-family: inherit !important;
+      flex-shrink: 0 !important;
+      box-sizing: border-box !important;
+      line-height: 1 !important;
       transition: all 0.2s ease !important;
     }
     .ghost-tab-btn:hover {
@@ -2633,17 +2640,15 @@
           </div>
         </div>
         <div class="yt-channel-drawer" id="ytDrawer-ghost" style="display: none;">
-          <div class="drawer-header-row">
+          <div class="ghost-tabs" id="tabsGhost">
             <button class="drawer-live-btn" onclick="playCurrentChannelLive()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               <span>Listen Live</span>
             </button>
-            <div class="ghost-tabs" id="tabsGhost">
-              <button class="ghost-tab-btn active" data-cat="latest">Latest (20)</button>
-              <button class="ghost-tab-btn" data-cat="monthly">This Month (10)</button>
-              <button class="ghost-tab-btn" data-cat="yearly">Best of 2026 (10)</button>
-              <button class="ghost-tab-btn" data-cat="alltime">Classic (10)</button>
-            </div>
+            <button class="ghost-tab-btn active" data-cat="latest">Latest (20)</button>
+            <button class="ghost-tab-btn" data-cat="monthly">This Month (10)</button>
+            <button class="ghost-tab-btn" data-cat="yearly">Best of 2026 (10)</button>
+            <button class="ghost-tab-btn" data-cat="alltime">Classic (10)</button>
           </div>
           <div class="episode-grid" id="ghostEpisodeGrid-ghost"></div>
         </div>
@@ -2671,15 +2676,13 @@
           </div>
         </div>
         <div class="yt-channel-drawer" id="ytDrawer-gungun" style="display: none;">
-          <div class="drawer-header-row">
+          <div class="ghost-tabs" id="tabsGungun">
             <button class="drawer-live-btn" onclick="playCurrentChannelLive()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               <span>Play Mixes</span>
             </button>
-            <div class="ghost-tabs" id="tabsGungun">
-              <button class="ghost-tab-btn active" data-cat="latest">Latest Mixes (20)</button>
-              <button class="ghost-tab-btn" data-cat="popular">Popular (20)</button>
-            </div>
+            <button class="ghost-tab-btn active" data-cat="latest">Latest Mixes (20)</button>
+            <button class="ghost-tab-btn" data-cat="popular">Popular (20)</button>
           </div>
           <div class="episode-grid" id="ghostEpisodeGrid-gungun"></div>
         </div>
@@ -2707,15 +2710,13 @@
           </div>
         </div>
         <div class="yt-channel-drawer" id="ytDrawer-cloudsphere" style="display: none;">
-          <div class="drawer-header-row">
+          <div class="ghost-tabs" id="tabsCloud">
             <button class="drawer-live-btn" onclick="playCurrentChannelLive()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               <span>Play Stories</span>
             </button>
-            <div class="ghost-tabs" id="tabsCloud">
-              <button class="ghost-tab-btn active" data-cat="general">General (20)</button>
-              <button class="ghost-tab-btn" data-cat="spooky">Spooky (20)</button>
-            </div>
+            <button class="ghost-tab-btn active" data-cat="general">General (20)</button>
+            <button class="ghost-tab-btn" data-cat="spooky">Spooky (20)</button>
           </div>
           <div class="episode-grid" id="ghostEpisodeGrid-cloudsphere"></div>
         </div>
