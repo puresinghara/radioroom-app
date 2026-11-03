@@ -4556,6 +4556,14 @@ const GHOST_EPISODES = [
     return { title, artist: artist || 'Worldwide FM', album: '', artwork };
   }
 
+  window.handleTsfJazzNativeB64 = function(b64) {
+    try {
+      const jsonStr = decodeURIComponent(escape(atob(b64)));
+      const data = JSON.parse(jsonStr);
+      if (window.handleTsfJazzNative) window.handleTsfJazzNative(data);
+    } catch(e) {}
+  };
+
   window.handleTsfJazzNative = function(data) {
     if (!data || !data.current) return;
     if (selectedRadio && selectedRadio.id === 'tsfjazz' && !isYtMode) {
