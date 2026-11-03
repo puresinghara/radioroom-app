@@ -4018,6 +4018,9 @@ const GHOST_EPISODES = [
     cleanup();
     setStatus('idle');
   }
+  window.stopAudio = stopAudio;
+  window.startAudio = startAudio;
+  window.audioElement = audio;
 
   function showError(msg) {
     cleanup();
@@ -4200,7 +4203,47 @@ const GHOST_EPISODES = [
     connectRadio();
   }
 
+
+  const MAX_RECENTS = 5;
+  let recentStationIds = [];
+  try {
+    recentStationIds = JSON.parse(localStorage.getItem('radioroom_recent_stations') || '[]');
+  } catch(e) { recentStationIds = []; }
+  if (!Array.isArray(recentStationIds) || recentStationIds.length === 0) {
+    recentStationIds = STATIONS.slice(0, 5).map(x => x.id);
+  }
+
+  function pushRecentStation(id) {
+    if (!id) return;
+    recentStationIds = [id, ...recentStationIds.filter(x => x !== id)].slice(0, MAX_RECENTS);
+    try {
+      localStorage.setItem('radioroom_recent_stations', JSON.stringify(recentStationIds));
+    } catch(e) {}
+    syncRecentsToNative();
+  }
+
+  function syncRecentsToNative() {
+    if (window.AndroidBridge && window.AndroidBridge.updateRecents) {
+      try {
+        const recentsData = recentStationIds.map(id => {
+          const st = STATIONS.find(x => x.id === id);
+          return st ? { id: st.id, name: st.name, logo: st.logo } : null;
+        }).filter(Boolean);
+        window.AndroidBridge.updateRecents(JSON.stringify(recentsData));
+      } catch(e) {}
+    }
+  }
+
+  window.selectStationById = function(stationId, autoplay = true) {
+    if (!stationId) return;
+    const s = STATIONS.find(x => x.id === stationId);
+    if (s) {
+      selectRadioStation(s, autoplay);
+    }
+  };
+
   function selectRadioStation(s, autoplay = false) {
+    pushRecentStation(s.id);
     cleanup();
     isYtMode = false;
     try { audio.loop = false; } catch(e) {}
@@ -4938,7 +4981,8 @@ const GHOST_EPISODES = [
   renderStations();
   renderGhostEpisodes();
   syncGhostEpisodes();
-  selectRadioStation(STATIONS[0], false);
+  selectRadioStation(STATIONS[0], false);
+  syncRecentsToNative();
   // Universal background playback watchdog & visibility auto-resume
   document.addEventListener('visibilitychange', () => {
     if (userExplicitPaused) return;
