@@ -173,9 +173,8 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#202024" />
-              <corners android:radius="10dp" />
-              <stroke android:width="1dp" android:color="#2AFFFFFF" />
+              <solid android:color="#00000000" />
+              <corners android:radius="12dp" />
           </shape>
           EOF
 
@@ -249,144 +248,143 @@ jobs:
                   android:scaleType="fitXY"
                   android:src="@drawable/radioroom_widget_bg" />
 
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical">
+
+                  <FrameLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="0dp"
+                      android:layout_weight="1">
+
+                      <LinearLayout
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:orientation="horizontal"
+                          android:gravity="center_vertical"
+                          android:paddingStart="14dp"
+                          android:paddingEnd="14dp"
+                          android:paddingTop="10dp"
+                          android:paddingBottom="10dp">
+
+                          <ImageView
+                              android:id="@+id/widget_artwork"
+                              android:layout_width="70dp"
+                              android:layout_height="70dp"
+                              android:scaleType="centerCrop"
+                              android:src="@mipmap/ic_launcher" />
+
+                          <LinearLayout
+                              android:id="@+id/widget_info_container"
+                              android:layout_width="0dp"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:layout_marginStart="14dp"
+                              android:orientation="vertical">
+
+                              <TextView
+                                  android:id="@+id/widget_title"
+                                  android:layout_width="match_parent"
+                                  android:layout_height="wrap_content"
+                                  android:layout_marginEnd="28dp"
+                                  android:text="Radio Room"
+                                  android:textColor="#FFFFFF"
+                                  android:textSize="15sp"
+                                  android:textStyle="bold"
+                                  android:maxLines="1"
+                                  android:ellipsize="end" />
+
+                              <TextView
+                                  android:id="@+id/widget_subtitle"
+                                  android:layout_width="match_parent"
+                                  android:layout_height="wrap_content"
+                                  android:text="Ready to Play"
+                                  android:textColor="#C8FFFFFF"
+                                  android:textSize="12sp"
+                                  android:maxLines="1"
+                                  android:ellipsize="end" />
+
+                              <LinearLayout
+                                  android:layout_width="match_parent"
+                                  android:layout_height="wrap_content"
+                                  android:layout_marginTop="4dp"
+                                  android:orientation="horizontal"
+                                  android:gravity="center_vertical">
+
+                                  <ImageView
+                                      android:id="@+id/widget_btn_prev"
+                                      android:layout_width="34dp"
+                                      android:layout_height="34dp"
+                                      android:padding="6dp"
+                                      android:src="@drawable/ic_widget_prev"
+                                      android:contentDescription="Previous" />
+
+                                  <ImageView
+                                      android:id="@+id/widget_btn_play"
+                                      android:layout_width="40dp"
+                                      android:layout_height="40dp"
+                                      android:layout_marginStart="12dp"
+                                      android:layout_marginEnd="12dp"
+                                      android:padding="9dp"
+                                      android:src="@drawable/ic_widget_play"
+                                      android:background="@drawable/radioroom_widget_play_bg"
+                                      android:contentDescription="Play/Pause" />
+
+                                  <ImageView
+                                      android:id="@+id/widget_btn_next"
+                                      android:layout_width="34dp"
+                                      android:layout_height="34dp"
+                                      android:padding="6dp"
+                                      android:src="@drawable/ic_widget_next"
+                                      android:contentDescription="Next" />
+                              </LinearLayout>
+                          </LinearLayout>
+                      </LinearLayout>
+
+                      <ImageView
+                          android:layout_width="22dp"
+                          android:layout_height="22dp"
+                          android:layout_gravity="top|end"
+                          android:layout_marginTop="12dp"
+                          android:layout_marginEnd="14dp"
+                          android:scaleType="fitCenter"
+                          android:src="@mipmap/ic_launcher" />
+                  </FrameLayout>
+
+                  <LinearLayout
+                      android:id="@+id/widget_row_recents"
+                      android:layout_width="match_parent"
+                      android:layout_height="60dp"
+                      android:paddingStart="8dp"
+                      android:paddingEnd="8dp"
+                      android:orientation="horizontal"
+                      android:gravity="center_vertical"
+                      android:background="@drawable/radioroom_widget_band_bg">
+
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_0" android:layout_width="44dp" android:layout_height="44dp" android:layout_gravity="center" android:scaleType="centerCrop" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_active_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_1" android:layout_width="44dp" android:layout_height="44dp" android:layout_gravity="center" android:scaleType="centerCrop" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_2" android:layout_width="44dp" android:layout_height="44dp" android:layout_gravity="center" android:scaleType="centerCrop" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_3" android:layout_width="44dp" android:layout_height="44dp" android:layout_gravity="center" android:scaleType="centerCrop" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_4" android:layout_width="44dp" android:layout_height="44dp" android:layout_gravity="center" android:scaleType="centerCrop" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                  </LinearLayout>
+              </LinearLayout>
+
               <ImageView
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:scaleType="fitXY"
                   android:src="@drawable/radioroom_glass_stroke" />
-
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:orientation="vertical"
-                  android:padding="12dp">
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="0dp"
-                      android:layout_weight="1"
-                      android:orientation="horizontal"
-                      android:gravity="center_vertical">
-
-                      <ImageView
-                          android:id="@+id/widget_artwork"
-                          android:layout_width="88dp"
-                          android:layout_height="88dp"
-                          android:scaleType="centerCrop"
-                          android:src="@mipmap/ic_launcher" />
-
-                      <LinearLayout
-                          android:id="@+id/widget_info_container"
-                          android:layout_width="0dp"
-                          android:layout_height="match_parent"
-                          android:layout_weight="1"
-                          android:layout_marginStart="14dp"
-                          android:orientation="vertical">
-
-                          <TextView
-                              android:id="@+id/widget_live"
-                              android:layout_width="match_parent"
-                              android:layout_height="wrap_content"
-                              android:text="LIVE RADIO"
-                              android:textColor="#B3FFFFFF"
-                              android:textSize="11sp"
-                              android:letterSpacing="0.06"
-                              android:maxLines="1"
-                              android:ellipsize="end" />
-
-                          <TextView
-                              android:id="@+id/widget_title"
-                              android:layout_width="match_parent"
-                              android:layout_height="wrap_content"
-                              android:text="Radio Room"
-                              android:textColor="#FFFFFF"
-                              android:textSize="16sp"
-                              android:textStyle="bold"
-                              android:maxLines="1"
-                              android:ellipsize="end" />
-
-                          <TextView
-                              android:id="@+id/widget_subtitle"
-                              android:layout_width="match_parent"
-                              android:layout_height="wrap_content"
-                              android:text="Ready to Play"
-                              android:textColor="#B8FFFFFF"
-                              android:textSize="12sp"
-                              android:maxLines="1"
-                              android:ellipsize="end" />
-
-                          <LinearLayout
-                              android:layout_width="match_parent"
-                              android:layout_height="0dp"
-                              android:layout_weight="1"
-                              android:orientation="horizontal" />
-
-                          <LinearLayout
-                              android:layout_width="match_parent"
-                              android:layout_height="wrap_content"
-                              android:orientation="horizontal"
-                              android:gravity="center_vertical">
-
-                              <ImageView
-                                  android:id="@+id/widget_btn_prev"
-                                  android:layout_width="34dp"
-                                  android:layout_height="34dp"
-                                  android:padding="7dp"
-                                  android:src="@drawable/ic_widget_prev"
-                                  android:background="@drawable/radioroom_widget_circle_bg"
-                                  android:contentDescription="Previous" />
-
-                              <ImageView
-                                  android:id="@+id/widget_btn_play"
-                                  android:layout_width="40dp"
-                                  android:layout_height="40dp"
-                                  android:layout_marginStart="10dp"
-                                  android:layout_marginEnd="10dp"
-                                  android:padding="9dp"
-                                  android:src="@drawable/ic_widget_play"
-                                  android:background="@drawable/radioroom_widget_play_bg"
-                                  android:contentDescription="Play/Pause" />
-
-                              <ImageView
-                                  android:id="@+id/widget_btn_next"
-                                  android:layout_width="34dp"
-                                  android:layout_height="34dp"
-                                  android:padding="7dp"
-                                  android:src="@drawable/ic_widget_next"
-                                  android:background="@drawable/radioroom_widget_circle_bg"
-                                  android:contentDescription="Next" />
-                          </LinearLayout>
-                      </LinearLayout>
-                  </LinearLayout>
-
-                  <LinearLayout
-                      android:id="@+id/widget_row_recents"
-                      android:layout_width="match_parent"
-                      android:layout_height="40dp"
-                      android:layout_marginTop="8dp"
-                      android:paddingStart="6dp"
-                      android:paddingEnd="6dp"
-                      android:orientation="horizontal"
-                      android:gravity="center_vertical"
-                      android:background="@drawable/radioroom_widget_strip_bg">
-
-                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-                          <ImageView android:id="@+id/widget_recent_0" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_active_bg" android:visibility="gone" />
-                      </FrameLayout>
-                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-                          <ImageView android:id="@+id/widget_recent_1" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
-                      </FrameLayout>
-                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-                          <ImageView android:id="@+id/widget_recent_2" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
-                      </FrameLayout>
-                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-                          <ImageView android:id="@+id/widget_recent_3" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
-                      </FrameLayout>
-                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-                          <ImageView android:id="@+id/widget_recent_4" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
-                      </FrameLayout>
-                  </LinearLayout>
-              </LinearLayout>
           </FrameLayout>
           EOF
 
@@ -403,12 +401,6 @@ jobs:
                   android:layout_height="match_parent"
                   android:scaleType="fitXY"
                   android:src="@drawable/radioroom_widget_bg" />
-
-              <ImageView
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:scaleType="fitXY"
-                  android:src="@drawable/radioroom_glass_stroke" />
 
               <LinearLayout
                   android:layout_width="match_parent"
@@ -449,7 +441,7 @@ jobs:
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:text="Ready to Play"
-                          android:textColor="#B8FFFFFF"
+                          android:textColor="#C8FFFFFF"
                           android:textSize="12sp"
                           android:maxLines="1"
                           android:ellipsize="end" />
@@ -461,15 +453,14 @@ jobs:
                       android:layout_height="32dp"
                       android:padding="6dp"
                       android:src="@drawable/ic_widget_prev"
-                      android:background="@drawable/radioroom_widget_circle_bg"
                       android:contentDescription="Previous" />
 
                   <ImageView
                       android:id="@+id/widget_btn_play"
                       android:layout_width="40dp"
                       android:layout_height="40dp"
-                      android:layout_marginStart="6dp"
-                      android:layout_marginEnd="6dp"
+                      android:layout_marginStart="4dp"
+                      android:layout_marginEnd="4dp"
                       android:padding="9dp"
                       android:src="@drawable/ic_widget_play"
                       android:background="@drawable/radioroom_widget_play_bg"
@@ -481,10 +472,28 @@ jobs:
                       android:layout_height="32dp"
                       android:padding="6dp"
                       android:src="@drawable/ic_widget_next"
-                      android:background="@drawable/radioroom_widget_circle_bg"
                       android:contentDescription="Next" />
               </LinearLayout>
+
+              <ImageView
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:scaleType="fitXY"
+                  android:src="@drawable/radioroom_glass_stroke" />
           </FrameLayout>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_band_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#33000000" />
+              <corners
+                  android:topLeftRadius="0dp"
+                  android:topRightRadius="0dp"
+                  android:bottomLeftRadius="28dp"
+                  android:bottomRightRadius="28dp" />
+          </shape>
           EOF
 
           cat << 'EOF' > android/app/src/main/res/drawable/radioroom_glass_stroke.xml
@@ -518,8 +527,8 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#202024" />
-              <corners android:radius="10dp" />
+              <solid android:color="#00000000" />
+              <corners android:radius="12dp" />
               <stroke android:width="2dp" android:color="#FFFFFF" />
           </shape>
           EOF
@@ -656,7 +665,7 @@ jobs:
                   if (cachedArtwork != null) {
                       float scale = Math.min(density, 1.5f);
                       int w = Math.round(widthDp * scale);
-                      int h = Math.round((compact ? 84f : 176f) * scale);
+                      int h = Math.round((compact ? 84f : 160f) * scale);
                       bg = buildGlassBackground(cachedArtwork, w, h, 28f * scale);
                   }
                   if (bg != null) v.setImageViewBitmap(R.id.widget_bg, bg);
@@ -671,12 +680,6 @@ jobs:
                   }
                   v.setTextViewText(R.id.widget_title, title);
                   v.setTextViewText(R.id.widget_subtitle, artist);
-                  if (!compact) {
-                      String live = isPlaying ? "LIVE" : "PAUSED";
-                      if (!station.isEmpty()) live += " · " + station.toUpperCase();
-                      v.setTextViewText(R.id.widget_live, live);
-                  }
-
                   v.setImageViewResource(R.id.widget_btn_play, isPlaying ? R.drawable.ic_widget_pause : R.drawable.ic_widget_play);
 
                   if (cachedArtwork != null) {
@@ -718,7 +721,7 @@ jobs:
 
                                   Bitmap logoBmp = getStationLogoBitmap(context, stationId, logo);
                                   if (logoBmp != null) {
-                                      v.setImageViewBitmap(slot, getRoundedCornerBitmap(context, logoBmp, 6));
+                                      v.setImageViewBitmap(slot, getRoundedCornerBitmap(context, logoBmp, 10));
                                   } else {
                                       v.setImageViewResource(slot, R.mipmap.ic_launcher);
                                   }

@@ -2724,6 +2724,29 @@
     }
     .sheet-live-dot { background: #ff5a4f !important; }
     .sheet-subtitle { color: rgba(255, 255, 255, 0.72) !important; }
+
+    /* Playing indicator: the logo stays fully visible; a small glass chip with moving bars sits in its corner
+       (it used to be a dark grey overlay over the whole logo) */
+    .station-card .card-eq,
+    .card-eq {
+      inset: auto 4px 4px auto !important;
+      width: 28px !important;
+      height: 20px !important;
+      padding: 0 !important;
+      gap: 2px !important;
+      border-radius: 8px !important;
+      background: rgba(20, 20, 30, 0.40) !important;
+      -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+      backdrop-filter: blur(10px) saturate(160%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      box-shadow: none !important;
+    }
+    .card-eq .eq-bar { background: #fff !important; width: 2.5px !important; }
+    .eq-overlay {
+      background: rgba(20, 20, 30, 0.28) !important;
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+    }
   </style>
 </head>
 <body>
