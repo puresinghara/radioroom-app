@@ -2752,6 +2752,75 @@
       -webkit-backdrop-filter: blur(2px);
       backdrop-filter: blur(2px);
     }
+
+    /* ===== Favorites, sleep timer, saved songs ===== */
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .hdr-btn, .card-fav-btn {
+      flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; padding: 0;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      background: var(--glass); border: 1px solid var(--glass-bd); color: #fff;
+    }
+    .hdr-btn svg, .card-fav-btn svg, .sheet-act svg { width: 20px; height: 20px; fill: currentColor; }
+    .card-fav-btn.on { background: rgba(29, 185, 84, 0.22); color: #1db954; border-color: rgba(29, 185, 84, 0.5); }
+    .fav-empty { padding: 36px 8px; text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; }
+    .sheet-actions { display: flex; justify-content: center; gap: 26px; margin: 0 auto 18px auto; width: 100%; max-width: 380px; }
+    .sheet-act {
+      background: none; border: none; padding: 0; cursor: pointer; font-family: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      font-size: 0.72rem; color: rgba(255, 255, 255, 0.65); min-width: 56px;
+    }
+    .sheet-act .ico {
+      width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      background: var(--glass); border: 1px solid var(--glass-bd); color: #fff;
+    }
+    .sheet-act.on { color: #1db954; }
+    .sheet-act.on .ico { background: rgba(29, 185, 84, 0.22); color: #1db954; border-color: rgba(29, 185, 84, 0.5); }
+    .rr-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 400;
+      background: rgba(0, 0, 0, 0.55); display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .rr-overlay.open { display: flex; }
+    .rr-dialog {
+      width: 100%; max-width: 360px; box-sizing: border-box; padding: 20px;
+      background: #17171f; border: 1px solid var(--glass-bd); border-radius: 22px; color: #fff;
+    }
+    .rr-dlg-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+    .rr-dlg-sub { font-size: 0.82rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 14px; }
+    .rr-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .rr-opt {
+      padding: 13px 10px; border-radius: 14px; cursor: pointer; font-family: inherit; font-size: 0.92rem;
+      background: var(--glass); border: 1px solid var(--glass-bd); color: #fff; text-align: center;
+    }
+    .rr-opt.sel { background: rgba(29, 185, 84, 0.22); color: #1db954; border-color: rgba(29, 185, 84, 0.5); }
+    .rr-opt-off { width: 100%; margin-top: 8px; color: #ff8a80; display: none; }
+    .rr-opt-off.show { display: block; }
+    .saved-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; background: #101016;
+      display: none; flex-direction: column; color: #fff;
+    }
+    .saved-screen.open { display: flex; }
+    .saved-head { display: flex; align-items: center; gap: 12px; padding: 24px 20px 14px 20px; }
+    .saved-head h2 { margin: 0; font-size: 1.15rem; font-weight: 600; flex: 1; }
+    .saved-count { font-size: 0.8rem; color: rgba(255, 255, 255, 0.55); }
+    .saved-list { flex: 1; overflow-y: auto; padding: 0 20px 40px 20px; }
+    .saved-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px; margin-bottom: 8px;
+      background: var(--glass); border: 1px solid var(--glass-bd); border-radius: 16px;
+    }
+    .saved-art { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: #2a2a33; flex-shrink: 0; }
+    .saved-info { flex: 1; min-width: 0; }
+    .saved-title, .saved-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .saved-title { font-size: 0.95rem; }
+    .saved-sub { font-size: 0.78rem; color: rgba(255, 255, 255, 0.6); margin-top: 2px; }
+    .saved-spot {
+      flex-shrink: 0; padding: 7px 11px; border-radius: 14px; font-size: 0.78rem; text-decoration: none;
+      background: rgba(29, 185, 84, 0.2); color: #1db954; border: 1px solid rgba(29, 185, 84, 0.5);
+    }
+    .saved-del {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; padding: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; background: none; border: none; color: rgba(255, 255, 255, 0.55);
+    }
+    .saved-del svg { width: 20px; height: 20px; fill: currentColor; }
   </style>
 </head>
 <body>
@@ -2766,9 +2835,12 @@
       </div>
       <span class="live-pill">LIVE</span>
     </a>
-    <div class="app-status">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">Ready</span>
+    <div class="header-right">
+      <button class="hdr-btn" id="savedOpenBtn" title="Saved songs" aria-label="Saved songs"></button>
+      <div class="app-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Ready</span>
+      </div>
     </div>
   </header>
 
@@ -2790,6 +2862,7 @@
     <div class="section-header">
       <div class="filter-group">
         <button class="filter-chip active" data-group="All" id="filterTabAll">All (20)</button>
+        <button class="filter-chip" data-group="Favorites" id="filterTabFav">Favorites (0)</button>
         <button class="filter-chip" data-group="Thai" id="filterTabThai">Thai (6)</button>
         <button class="filter-chip" data-group="Global" id="filterTabGlobal">Global (14)</button>
         <button class="filter-chip" data-group="Ghost" id="filterTabGhost">YouTube (3)</button>
@@ -2998,6 +3071,12 @@
         </div>
       </div>
 
+      <div class="sheet-actions">
+        <button class="sheet-act" id="sheetFavBtn" aria-label="Favorite station"><span class="ico"></span><span class="lbl">Favorite</span></button>
+        <button class="sheet-act" id="sheetSaveBtn" aria-label="Save song"><span class="ico"></span><span class="lbl">Save song</span></button>
+        <button class="sheet-act" id="sheetSleepBtn" aria-label="Sleep timer"><span class="ico"></span><span class="lbl">Sleep</span></button>
+      </div>
+
       <div class="sheet-controls">
         <button class="sheet-btn" id="sheetPrevBtn" title="Previous" aria-label="Previous">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
@@ -3018,6 +3097,31 @@
         <input type="range" class="sheet-slider sheet-volume-slider" id="sheetVolumeSlider" min="0" max="1" step="0.01" value="1" aria-label="App volume">
       </div>
     </div>
+  </div>
+
+  <div class="rr-overlay" id="sleepOverlay">
+    <div class="rr-dialog" role="dialog" aria-label="Sleep timer">
+      <div class="rr-dlg-title">Sleep timer</div>
+      <div class="rr-dlg-sub">Playback stops when time runs out.</div>
+      <div class="rr-opts">
+        <button class="rr-opt" data-min="15">15 minutes</button>
+        <button class="rr-opt" data-min="30">30 minutes</button>
+        <button class="rr-opt" data-min="45">45 minutes</button>
+        <button class="rr-opt" data-min="60">60 minutes</button>
+      </div>
+      <button class="rr-opt rr-opt-off" id="sleepOffBtn">Turn off timer</button>
+    </div>
+  </div>
+
+  <div class="saved-screen" id="savedScreen">
+    <div class="saved-head">
+      <button class="sheet-close-btn" id="savedCloseBtn" title="Back" aria-label="Back">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
+      <h2>Saved songs</h2>
+      <span class="saved-count" id="savedCount"></span>
+    </div>
+    <div class="saved-list" id="savedList"></div>
   </div>
 
 <script>
@@ -5156,6 +5260,14 @@ const GHOST_EPISODES = [
 
     card.appendChild(meta);
 
+    // Favorite (heart) button
+    const favBtn = document.createElement('button');
+    favBtn.className = 'card-fav-btn';
+    favBtn.dataset.favId = s.id;
+    refreshFavBtn(favBtn);
+    favBtn.onclick = (e) => { e.stopPropagation(); toggleFavorite(s.id); };
+    card.appendChild(favBtn);
+
     // Play button
     const btn = document.createElement('button');
     btn.className = 'card-play-btn';
@@ -5200,11 +5312,28 @@ const GHOST_EPISODES = [
       }
     }
 
-    const thaiStations = STATIONS.filter(s => s.group === 'Thai');
-    const globalStations = STATIONS.filter(s => s.group === 'Global');
+    const favFirst = (list) => list.slice().sort((a, b) => (isFav(b.id) ? 1 : 0) - (isFav(a.id) ? 1 : 0));
+    const thaiStations = favFirst(STATIONS.filter(s => s.group === 'Thai'));
+    const globalStations = favFirst(STATIONS.filter(s => s.group === 'Global'));
+    const favStations = STATIONS.filter(s => isFav(s.id));
+
+    if (currentGroup === 'Favorites' && favStations.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'fav-empty';
+      empty.textContent = 'No favorites yet. Tap the heart on a station to add it.';
+      container.appendChild(empty);
+      renderRecentsCarousel();
+      return;
+    }
 
     const sections = [];
-    if (currentGroup === 'All') {
+    if (currentGroup === 'Favorites') {
+      sections.push({
+        title: 'Favorites',
+        badge: favStations.length + TXT_UNIT_STATION,
+        stations: favStations
+      });
+    } else if (currentGroup === 'All') {
       sections.push({
         title: TXT_STATION_THAI,
         badge: thaiStations.length + TXT_UNIT_STATION,
@@ -5655,6 +5784,7 @@ const GHOST_EPISODES = [
     try { audio.loop = false; } catch(e) {}
     selectedRadio = s;
     currentTrackInfo = null;
+    updateSheetActions();
     hideError();
     
     if (s.color) {
@@ -6119,6 +6249,7 @@ const GHOST_EPISODES = [
   function renderNowPlayingBanner(track) {
     if (!track) return;
     currentTrackInfo = track;
+    updateSheetActions();
     const finalArt = track.artwork || selectedRadio.logo;
     applyGlassArt(finalArt);
     const songTitle = track.title || TXT_UNKNOWN_TRACK;
@@ -6379,6 +6510,7 @@ const GHOST_EPISODES = [
       if (sBadgeText) sBadgeText.textContent = 'LIVE RADIO';
       if (sProgWrap) sProgWrap.style.display = 'none';
     }
+    updateSheetActions();
   }
 
   function openNowPlayingSheet() {
@@ -6513,8 +6645,271 @@ const GHOST_EPISODES = [
       if (globalBtn) globalBtn.textContent = 'Global (' + globalCount + ')';
       const ghostBtn = document.getElementById('filterTabGhost');
       if (ghostBtn) ghostBtn.textContent = 'YouTube (3)';
+      const favTab = document.getElementById('filterTabFav');
+      if (favTab) favTab.textContent = 'Favorites (' + STATIONS.filter(s => isFav(s.id)).length + ')';
     } catch (e) {}
   }
+
+  // ===== Icons (Material paths) =====
+  var RR_ICONS = {
+    heart: 'M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z',
+    heartOn: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+    bookmark: 'M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15-5-2.18L7 18V5h10v13z',
+    bookmarkOn: 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z',
+    moon: 'M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z',
+    trash: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+    library: 'M19 18l2 1V3c0-1.1-.9-2-2-2H8.99C7.89 1 7 1.9 7 3h10c1.1 0 2 .9 2 2v13zM15 5H5c-1.1 0-2 .9-2 2v16l7-3 7 3V7c0-1.1-.9-2-2-2z'
+  };
+  function rrIcon(name) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + RR_ICONS[name] + '"/></svg>';
+  }
+
+  // ===== Favorite stations =====
+  var favoriteIds = [];
+  try { favoriteIds = JSON.parse(localStorage.getItem('radioroom_favorites') || '[]'); } catch (e) { favoriteIds = []; }
+  if (!Array.isArray(favoriteIds)) favoriteIds = [];
+
+  function isFav(id) { return favoriteIds.indexOf(id) !== -1; }
+
+  function refreshFavBtn(btn) {
+    const id = btn.dataset.favId;
+    const on = isFav(id);
+    const st = STATIONS.find(x => x.id === id);
+    btn.classList.toggle('on', on);
+    btn.innerHTML = rrIcon(on ? 'heartOn' : 'heart');
+    btn.setAttribute('aria-label', (on ? 'Remove from favorites: ' : 'Add to favorites: ') + (st ? st.name : ''));
+  }
+
+  function toggleFavorite(id) {
+    if (!id) return;
+    favoriteIds = isFav(id) ? favoriteIds.filter(x => x !== id) : favoriteIds.concat([id]);
+    try { localStorage.setItem('radioroom_favorites', JSON.stringify(favoriteIds)); } catch (e) {}
+    document.querySelectorAll('.card-fav-btn').forEach(b => { if (b.dataset.favId === id) refreshFavBtn(b); });
+    updateFilterTabCounts();
+    if (currentGroup === 'Favorites') renderStations();
+    updateSheetActions();
+  }
+
+  // ===== Saved songs =====
+  var savedSongs = [];
+  try { savedSongs = JSON.parse(localStorage.getItem('radioroom_saved_songs') || '[]'); } catch (e) { savedSongs = []; }
+  if (!Array.isArray(savedSongs)) savedSongs = [];
+
+  function songKey(t, a) { return (String(t || '') + '|' + String(a || '')).toLowerCase(); }
+
+  function currentSong() {
+    if (isYtMode || !currentTrackInfo || !currentTrackInfo.title) return null;
+    if (currentTrackInfo.title === TXT_UNKNOWN_TRACK) return null;
+    return {
+      t: String(currentTrackInfo.title),
+      a: String(currentTrackInfo.artist || ''),
+      art: String(currentTrackInfo.artwork || ''),
+      st: selectedRadio ? selectedRadio.name : ''
+    };
+  }
+
+  function isSongSaved(song) {
+    const k = songKey(song.t, song.a);
+    return savedSongs.some(x => songKey(x.t, x.a) === k);
+  }
+
+  function persistSavedSongs() {
+    try { localStorage.setItem('radioroom_saved_songs', JSON.stringify(savedSongs)); } catch (e) {}
+  }
+
+  function toggleSaveCurrentSong() {
+    const song = currentSong();
+    if (!song) return;
+    if (isSongSaved(song)) {
+      const k = songKey(song.t, song.a);
+      savedSongs = savedSongs.filter(x => songKey(x.t, x.a) !== k);
+    } else {
+      song.ts = Date.now();
+      savedSongs.unshift(song);
+    }
+    persistSavedSongs();
+    updateSheetActions();
+  }
+
+  function renderSavedScreen() {
+    const list = document.getElementById('savedList');
+    const count = document.getElementById('savedCount');
+    if (!list) return;
+    list.innerHTML = '';
+    if (count) count.textContent = savedSongs.length ? String(savedSongs.length) : '';
+    if (savedSongs.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'fav-empty';
+      empty.textContent = 'No saved songs yet. Tap Save song on the player while a track is playing.';
+      list.appendChild(empty);
+      return;
+    }
+    savedSongs.forEach(song => {
+      const row = document.createElement('div');
+      row.className = 'saved-row';
+
+      const art = document.createElement('img');
+      art.className = 'saved-art';
+      art.alt = '';
+      art.src = song.art || 'app_logo.png';
+      art.onerror = () => { art.onerror = null; art.src = 'app_logo.png'; };
+      row.appendChild(art);
+
+      const info = document.createElement('div');
+      info.className = 'saved-info';
+      const title = document.createElement('div');
+      title.className = 'saved-title';
+      title.textContent = song.t;
+      const sub = document.createElement('div');
+      sub.className = 'saved-sub';
+      let when = '';
+      try { when = new Date(song.ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); } catch (e) {}
+      sub.textContent = [song.a, song.st, when].filter(Boolean).join(' · ');
+      info.appendChild(title);
+      info.appendChild(sub);
+      row.appendChild(info);
+
+      const link = document.createElement('a');
+      link.className = 'saved-spot';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.href = 'https://open.spotify.com/search/' + encodeURIComponent((song.t + ' ' + song.a).trim());
+      link.textContent = 'Spotify ↗';
+      row.appendChild(link);
+
+      const del = document.createElement('button');
+      del.className = 'saved-del';
+      del.setAttribute('aria-label', 'Remove ' + song.t);
+      del.innerHTML = rrIcon('trash');
+      del.onclick = () => {
+        const k = songKey(song.t, song.a);
+        savedSongs = savedSongs.filter(x => songKey(x.t, x.a) !== k);
+        persistSavedSongs();
+        renderSavedScreen();
+        updateSheetActions();
+      };
+      row.appendChild(del);
+
+      list.appendChild(row);
+    });
+  }
+
+  function openSavedScreen() {
+    renderSavedScreen();
+    const el = document.getElementById('savedScreen');
+    if (el) el.classList.add('open');
+  }
+  function closeSavedScreen() {
+    const el = document.getElementById('savedScreen');
+    if (el) el.classList.remove('open');
+  }
+
+  // ===== Sleep timer =====
+  var sleepEndsAt = 0;
+  var sleepMinutes = 0;
+  var sleepTick = null;
+
+  function clearSleepTimer() {
+    if (sleepTick) { clearInterval(sleepTick); sleepTick = null; }
+    sleepEndsAt = 0;
+    sleepMinutes = 0;
+    updateSleepPicker();
+    updateSheetActions();
+  }
+
+  function setSleepTimer(min) {
+    if (sleepTick) { clearInterval(sleepTick); sleepTick = null; }
+    sleepMinutes = min;
+    sleepEndsAt = Date.now() + min * 60000;
+    sleepTick = setInterval(() => {
+      if (Date.now() >= sleepEndsAt) {
+        clearSleepTimer();
+        if (isPlaying) stopAudio();
+      } else {
+        updateSheetActions();
+      }
+    }, 1000);
+    updateSleepPicker();
+    updateSheetActions();
+  }
+
+  function sleepRemainingText() {
+    const left = Math.max(0, Math.round((sleepEndsAt - Date.now()) / 1000));
+    const m = Math.floor(left / 60);
+    const s = left % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function updateSleepPicker() {
+    document.querySelectorAll('#sleepOverlay .rr-opt[data-min]').forEach(b => {
+      b.classList.toggle('sel', !!sleepEndsAt && Number(b.dataset.min) === sleepMinutes);
+    });
+    const off = document.getElementById('sleepOffBtn');
+    if (off) off.classList.toggle('show', !!sleepEndsAt);
+  }
+
+  function openSleepPicker() {
+    updateSleepPicker();
+    const el = document.getElementById('sleepOverlay');
+    if (el) el.classList.add('open');
+  }
+  function closeSleepPicker() {
+    const el = document.getElementById('sleepOverlay');
+    if (el) el.classList.remove('open');
+  }
+
+  // ===== Player sheet action row =====
+  function updateSheetActions() {
+    const favBtn = document.getElementById('sheetFavBtn');
+    const saveBtn = document.getElementById('sheetSaveBtn');
+    const sleepBtn = document.getElementById('sheetSleepBtn');
+    if (!favBtn || !saveBtn || !sleepBtn) return;
+
+    const stationOk = !isYtMode && selectedRadio;
+    favBtn.style.display = stationOk ? '' : 'none';
+    if (stationOk) {
+      const on = isFav(selectedRadio.id);
+      favBtn.classList.toggle('on', on);
+      favBtn.querySelector('.ico').innerHTML = rrIcon(on ? 'heartOn' : 'heart');
+    }
+
+    const song = currentSong();
+    saveBtn.style.display = song ? '' : 'none';
+    if (song) {
+      const saved = isSongSaved(song);
+      saveBtn.classList.toggle('on', saved);
+      saveBtn.querySelector('.ico').innerHTML = rrIcon(saved ? 'bookmarkOn' : 'bookmark');
+      saveBtn.querySelector('.lbl').textContent = saved ? 'Saved' : 'Save song';
+    }
+
+    sleepBtn.classList.toggle('on', !!sleepEndsAt);
+    sleepBtn.querySelector('.ico').innerHTML = rrIcon('moon');
+    sleepBtn.querySelector('.lbl').textContent = sleepEndsAt ? sleepRemainingText() : 'Sleep';
+  }
+
+  (function wireNewFeatures() {
+    const savedOpen = document.getElementById('savedOpenBtn');
+    if (savedOpen) { savedOpen.innerHTML = rrIcon('library'); savedOpen.onclick = openSavedScreen; }
+    const savedClose = document.getElementById('savedCloseBtn');
+    if (savedClose) savedClose.onclick = closeSavedScreen;
+
+    const favBtn = document.getElementById('sheetFavBtn');
+    if (favBtn) favBtn.onclick = () => { if (selectedRadio && !isYtMode) toggleFavorite(selectedRadio.id); };
+    const saveBtn = document.getElementById('sheetSaveBtn');
+    if (saveBtn) saveBtn.onclick = toggleSaveCurrentSong;
+    const sleepBtn = document.getElementById('sheetSleepBtn');
+    if (sleepBtn) sleepBtn.onclick = openSleepPicker;
+
+    const overlay = document.getElementById('sleepOverlay');
+    if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeSleepPicker(); });
+    document.querySelectorAll('#sleepOverlay .rr-opt[data-min]').forEach(b => {
+      b.onclick = () => { setSleepTimer(Number(b.dataset.min)); closeSleepPicker(); };
+    });
+    const off = document.getElementById('sleepOffBtn');
+    if (off) off.onclick = () => { clearSleepTimer(); closeSleepPicker(); };
+
+    updateSheetActions();
+  })();
 
   initGreeting();
   updateFilterTabCounts();
