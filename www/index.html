@@ -2635,15 +2635,10 @@
     }
     body { background-color: #0b0b10 !important; }
 
-    /* Backdrop: the current cover, heavily blurred, behind everything */
+    /* Home backdrop: the original fixed green glow (does not follow the station colour) */
     .ambient-bg {
-      height: 100vh !important;
-      background-size: cover !important;
-      background-position: center !important;
-      filter: blur(60px) saturate(1.5);
-      opacity: 0.5;
-      transform: scale(1.5);
-      transition: background-image 0.8s ease, opacity 0.8s ease !important;
+      height: 400px !important;
+      background: radial-gradient(circle at 50% -20%, rgba(29, 185, 84, 0.25), transparent 70%) !important;
     }
 
     header {
@@ -6020,13 +6015,11 @@ const GHOST_EPISODES = [
     };
   }
 
-  // Blurred cover as the page + Now Playing backdrop (the glass look)
+  // Blurred cover as the Now Playing backdrop only (the home page keeps its fixed backdrop)
   function applyGlassArt(src) {
     try {
       if (!src) return;
       const url = 'url("' + String(src).replace(/"/g, '%22') + '")';
-      const amb = document.getElementById('ambientBg');
-      if (amb) amb.style.backgroundImage = url;
       const sheet = document.getElementById('npSheet');
       if (sheet) sheet.style.setProperty('--sheet-art', url);
     } catch (e) {}

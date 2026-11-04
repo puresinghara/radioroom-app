@@ -766,18 +766,51 @@ jobs:
                   return Bitmap.createScaledBitmap(src, Math.max(1, Math.round(w * f)), Math.max(1, Math.round(h * f)), true);
               }
 
-              // Widgets cannot blur what is behind them, so fake frosted glass: shrink the cover to a few pixels,
-              // stretch it back (= very soft blur), add a dark tint and a faint top highlight, round the corners.
+              // Average colour of the cover, pushed into a dark, slightly saturated range so white text stays readable.
+              // Only this one colour is used (never the cover pixels), so low-resolution art can't look blocky.
+              private static int tintFromCover(Bitmap cover) {
+                  try {
+                      Bitmap s = Bitmap.createScaledBitmap(cover, 8, 8, true);
+                      float[] hsv = new float[3];
+                      double r = 0, g = 0, b = 0, wsum = 0;
+                      for (int y = 0; y < 8; y++) {
+                          for (int x = 0; x < 8; x++) {
+                              int px = s.getPixel(x, y);
+                              android.graphics.Color.colorToHSV(px, hsv);
+                              // Favour colourful pixels over white/black backgrounds
+                              double wgt = 0.15 + hsv[1] * hsv[2];
+                              r += android.graphics.Color.red(px) * wgt;
+                              g += android.graphics.Color.green(px) * wgt;
+                              b += android.graphics.Color.blue(px) * wgt;
+                              wsum += wgt;
+                          }
+                      }
+                      int avg = android.graphics.Color.rgb((int) (r / wsum), (int) (g / wsum), (int) (b / wsum));
+                      android.graphics.Color.colorToHSV(avg, hsv);
+                      hsv[1] = Math.max(0.35f, Math.min(hsv[1], 0.75f));
+                      hsv[2] = Math.max(0.32f, Math.min(hsv[2], 0.55f));
+                      return android.graphics.Color.HSVToColor(hsv);
+                  } catch (Throwable t) {
+                      return 0xFF3A2D5C;
+                  }
+              }
+
+              // Widgets cannot blur what is behind them, so fake frosted glass: a smooth gradient built from ONE colour
+              // taken from the cover, a dark glass tint, a faint top highlight and rounded corners.
               private static Bitmap buildGlassBackground(Bitmap cover, int w, int h, float radiusPx) {
                   try {
                       Bitmap out = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
                       Canvas c = new Canvas(out);
-                      Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
-                      Bitmap tiny = Bitmap.createScaledBitmap(cover, 16, 16, true);
-                      Bitmap soft = Bitmap.createScaledBitmap(tiny, w, h, true);
-                      c.drawBitmap(soft, 0, 0, p);
-                      c.drawColor(0x9410101A);
+                      int tint = tintFromCover(cover);
+                      int dark = android.graphics.Color.rgb(
+                          (int) (android.graphics.Color.red(tint) * 0.28f),
+                          (int) (android.graphics.Color.green(tint) * 0.28f),
+                          (int) (android.graphics.Color.blue(tint) * 0.28f));
+                      Paint gp = new Paint(Paint.ANTI_ALIAS_FLAG);
+                      gp.setShader(new LinearGradient(0, 0, w, h, tint, dark, Shader.TileMode.CLAMP));
+                      c.drawRect(0, 0, w, h, gp);
+                      c.drawColor(0x7810101A);
 
                       Paint hp = new Paint(Paint.ANTI_ALIAS_FLAG);
                       hp.setShader(new LinearGradient(0, 0, 0, h * 0.55f, 0x2AFFFFFF, 0x00FFFFFF, Shader.TileMode.CLAMP));
