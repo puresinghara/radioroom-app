@@ -2654,6 +2654,11 @@
       backdrop-filter: var(--glass-blur);
       box-shadow: none !important;
     }
+    /* Inside the blurred header: a nested backdrop-filter renders as a grey box on some WebViews */
+    header .app-status {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
     .filter-chip.active {
       background: #fff !important;
       color: #14141a !important;
