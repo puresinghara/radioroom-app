@@ -2623,6 +2623,112 @@
     }
     .sheet-volume-row .sheet-mute-btn { width: 44px; height: 44px; flex-shrink: 0; }
     .sheet-volume-row .sheet-volume-slider { flex: 1; }
+
+    /* ============================================================
+       Glass theme: frosted panels over a blurred cover-art backdrop
+       ============================================================ */
+    :root {
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-strong: rgba(255, 255, 255, 0.15);
+      --glass-bd: rgba(255, 255, 255, 0.16);
+      --glass-blur: blur(22px) saturate(150%);
+    }
+    body { background-color: #0b0b10 !important; }
+
+    /* Backdrop: the current cover, heavily blurred, behind everything */
+    .ambient-bg {
+      height: 100vh !important;
+      background-size: cover !important;
+      background-position: center !important;
+      filter: blur(60px) saturate(1.5);
+      opacity: 0.5;
+      transform: scale(1.5);
+      transition: background-image 0.8s ease, opacity 0.8s ease !important;
+    }
+
+    header {
+      background: rgba(14, 14, 20, 0.55) !important;
+      -webkit-backdrop-filter: var(--glass-blur) !important;
+      backdrop-filter: var(--glass-blur) !important;
+      border-bottom: 1px solid var(--glass-bd) !important;
+    }
+    .app-status, .recent-chip, .filter-chip:not(.active), .alert-banner {
+      background: var(--glass) !important;
+      border: 1px solid var(--glass-bd) !important;
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: none !important;
+    }
+    .filter-chip.active {
+      background: #fff !important;
+      color: #14141a !important;
+      border-color: #fff !important;
+    }
+    .recent-chip.active { background: var(--glass-strong) !important; border-color: rgba(255, 255, 255, 0.4) !important; color: #fff !important; }
+
+    .station-card, .yt-channel-drawer {
+      background: var(--glass) !important;
+      border: 1px solid var(--glass-bd) !important;
+      border-radius: 22px !important;
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: none !important;
+    }
+    .station-card.active, .station-card.playing {
+      background: var(--glass-strong) !important;
+      border-color: rgba(255, 255, 255, 0.36) !important;
+    }
+    .card-art-wrap { border-radius: 14px !important; }
+    .card-play-btn {
+      background: var(--glass-strong) !important;
+      color: #fff !important;
+      border: 1px solid var(--glass-bd) !important;
+      box-shadow: none !important;
+    }
+    .station-card.playing .card-play-btn { background: #fff !important; color: #14141a !important; border-color: #fff !important; }
+
+    .bottom-player {
+      background: rgba(24, 22, 34, 0.6) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+      backdrop-filter: blur(28px) saturate(160%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 26px !important;
+    }
+    .ctrl-btn.play-pause { background: #fff !important; color: #14141a !important; box-shadow: none !important; }
+
+    /* Now Playing sheet: blurred cover fills the whole screen */
+    .now-playing-sheet { background: #101016 !important; }
+    .now-playing-sheet::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--sheet-art, none) center / cover no-repeat;
+      filter: blur(40px) saturate(1.4);
+      transform: scale(1.4);
+      z-index: -1;
+    }
+    .now-playing-sheet::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 10, 16, 0.58);
+      z-index: -1;
+    }
+    .sheet-art-wrap { border-radius: 26px !important; border: 1px solid rgba(255, 255, 255, 0.22); }
+    .sheet-close-btn, .sheet-btn:not(.play-pause) {
+      background: var(--glass-strong) !important;
+      border: 1px solid var(--glass-bd) !important;
+      color: #fff !important;
+      border-radius: 50% !important;
+    }
+    .sheet-btn.play-pause { background: #fff !important; color: #14141a !important; }
+    .sheet-live-badge {
+      background: var(--glass) !important;
+      border: 1px solid var(--glass-bd) !important;
+      color: #fff !important;
+    }
+    .sheet-live-dot { background: #ff5a4f !important; }
+    .sheet-subtitle { color: rgba(255, 255, 255, 0.72) !important; }
   </style>
 </head>
 <body>
@@ -5470,6 +5576,7 @@ const GHOST_EPISODES = [
     }
 
     document.getElementById('currArt').src = s.logo;
+    applyGlassArt(s.logo);
     document.getElementById('currTitle').textContent = s.name;
     document.getElementById('currSubtitle').textContent = s.tagline || (s.group === 'Thai' ? TXT_STATION_THAI : TXT_STATION_GLOBAL);
     document.getElementById('stationSiteBtn').href = s.website || '#';
@@ -5913,10 +6020,23 @@ const GHOST_EPISODES = [
     };
   }
 
+  // Blurred cover as the page + Now Playing backdrop (the glass look)
+  function applyGlassArt(src) {
+    try {
+      if (!src) return;
+      const url = 'url("' + String(src).replace(/"/g, '%22') + '")';
+      const amb = document.getElementById('ambientBg');
+      if (amb) amb.style.backgroundImage = url;
+      const sheet = document.getElementById('npSheet');
+      if (sheet) sheet.style.setProperty('--sheet-art', url);
+    } catch (e) {}
+  }
+
   function renderNowPlayingBanner(track) {
     if (!track) return;
     currentTrackInfo = track;
     const finalArt = track.artwork || selectedRadio.logo;
+    applyGlassArt(finalArt);
     const songTitle = track.title || TXT_UNKNOWN_TRACK;
     const songArtist = track.artist || selectedRadio.name;
 
@@ -6147,6 +6267,7 @@ const GHOST_EPISODES = [
 
       if (sHeadTitle) sHeadTitle.textContent = headerTitle;
       if (sArt) sArt.src = channelLogo;
+      applyGlassArt(channelLogo);
       if (sTitle) sTitle.textContent = currentGhostEpisode.title || chanTitle;
       if (sSubtitle) sSubtitle.textContent = isGungun ? 'GUN GUN (DJ Mix)' : (isCloud ? 'CLOUDSPHERE' : (currentGhostEpisode.author || 'The Ghost Radio'));
       if (sBadge) sBadge.style.display = 'inline-flex';

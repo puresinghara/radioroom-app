@@ -136,14 +136,15 @@ jobs:
           cat << 'EOF' > android/app/src/main/res/xml/radioroom_widget_info.xml
           <?xml version="1.0" encoding="utf-8"?>
           <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-              android:minWidth="180dp"
-              android:minHeight="80dp"
+              android:minWidth="250dp"
+              android:minHeight="110dp"
               android:minResizeWidth="180dp"
-              android:minResizeHeight="80dp"
+              android:minResizeHeight="58dp"
               android:targetCellWidth="4"
               android:targetCellHeight="2"
               android:updatePeriodMillis="0"
               android:initialLayout="@layout/radioroom_widget"
+              android:previewLayout="@layout/radioroom_widget"
               android:resizeMode="horizontal|vertical"
               android:widgetCategory="home_screen"
               android:description="@string/app_name" />
@@ -160,9 +161,11 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#F2141416" />
-              <corners android:radius="22dp" />
-              <stroke android:width="1dp" android:color="#33FFFFFF" />
+              <gradient
+                  android:angle="135"
+                  android:startColor="#F01E1836"
+                  android:endColor="#F00E0E15" />
+              <corners android:radius="28dp" />
           </shape>
           EOF
 
@@ -234,39 +237,201 @@ jobs:
 
           cat << 'EOF' > android/app/src/main/res/layout/radioroom_widget.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/widget_root"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:padding="14dp"
-              android:background="@drawable/radioroom_widget_bg">
+              android:layout_height="match_parent">
 
-              <!-- Row 1: Now Playing Controller -->
-              <LinearLayout
-                  android:id="@+id/widget_row_top"
+              <ImageView
+                  android:id="@+id/widget_bg"
                   android:layout_width="match_parent"
-                  android:layout_height="0dp"
-                  android:layout_weight="1"
+                  android:layout_height="match_parent"
+                  android:scaleType="fitXY"
+                  android:src="@drawable/radioroom_widget_bg" />
+
+              <ImageView
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:scaleType="fitXY"
+                  android:src="@drawable/radioroom_glass_stroke" />
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  android:padding="12dp">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="0dp"
+                      android:layout_weight="1"
+                      android:orientation="horizontal"
+                      android:gravity="center_vertical">
+
+                      <ImageView
+                          android:id="@+id/widget_artwork"
+                          android:layout_width="88dp"
+                          android:layout_height="88dp"
+                          android:scaleType="centerCrop"
+                          android:src="@mipmap/ic_launcher" />
+
+                      <LinearLayout
+                          android:id="@+id/widget_info_container"
+                          android:layout_width="0dp"
+                          android:layout_height="match_parent"
+                          android:layout_weight="1"
+                          android:layout_marginStart="14dp"
+                          android:orientation="vertical">
+
+                          <TextView
+                              android:id="@+id/widget_live"
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:text="LIVE RADIO"
+                              android:textColor="#B3FFFFFF"
+                              android:textSize="11sp"
+                              android:letterSpacing="0.06"
+                              android:maxLines="1"
+                              android:ellipsize="end" />
+
+                          <TextView
+                              android:id="@+id/widget_title"
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:text="Radio Room"
+                              android:textColor="#FFFFFF"
+                              android:textSize="16sp"
+                              android:textStyle="bold"
+                              android:maxLines="1"
+                              android:ellipsize="end" />
+
+                          <TextView
+                              android:id="@+id/widget_subtitle"
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:text="Ready to Play"
+                              android:textColor="#B8FFFFFF"
+                              android:textSize="12sp"
+                              android:maxLines="1"
+                              android:ellipsize="end" />
+
+                          <LinearLayout
+                              android:layout_width="match_parent"
+                              android:layout_height="0dp"
+                              android:layout_weight="1"
+                              android:orientation="horizontal" />
+
+                          <LinearLayout
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:orientation="horizontal"
+                              android:gravity="center_vertical">
+
+                              <ImageView
+                                  android:id="@+id/widget_btn_prev"
+                                  android:layout_width="34dp"
+                                  android:layout_height="34dp"
+                                  android:padding="7dp"
+                                  android:src="@drawable/ic_widget_prev"
+                                  android:background="@drawable/radioroom_widget_circle_bg"
+                                  android:contentDescription="Previous" />
+
+                              <ImageView
+                                  android:id="@+id/widget_btn_play"
+                                  android:layout_width="40dp"
+                                  android:layout_height="40dp"
+                                  android:layout_marginStart="10dp"
+                                  android:layout_marginEnd="10dp"
+                                  android:padding="9dp"
+                                  android:src="@drawable/ic_widget_play"
+                                  android:background="@drawable/radioroom_widget_play_bg"
+                                  android:contentDescription="Play/Pause" />
+
+                              <ImageView
+                                  android:id="@+id/widget_btn_next"
+                                  android:layout_width="34dp"
+                                  android:layout_height="34dp"
+                                  android:padding="7dp"
+                                  android:src="@drawable/ic_widget_next"
+                                  android:background="@drawable/radioroom_widget_circle_bg"
+                                  android:contentDescription="Next" />
+                          </LinearLayout>
+                      </LinearLayout>
+                  </LinearLayout>
+
+                  <LinearLayout
+                      android:id="@+id/widget_row_recents"
+                      android:layout_width="match_parent"
+                      android:layout_height="40dp"
+                      android:layout_marginTop="8dp"
+                      android:paddingStart="6dp"
+                      android:paddingEnd="6dp"
+                      android:orientation="horizontal"
+                      android:gravity="center_vertical"
+                      android:background="@drawable/radioroom_widget_strip_bg">
+
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_0" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_active_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_1" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_2" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_3" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                      <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                          <ImageView android:id="@+id/widget_recent_4" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:scaleType="fitCenter" android:padding="2dp" android:background="@drawable/radioroom_widget_slot_bg" android:visibility="gone" />
+                      </FrameLayout>
+                  </LinearLayout>
+              </LinearLayout>
+          </FrameLayout>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/layout/radioroom_widget_compact.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/widget_root"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+              <ImageView
+                  android:id="@+id/widget_bg"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:scaleType="fitXY"
+                  android:src="@drawable/radioroom_widget_bg" />
+
+              <ImageView
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:scaleType="fitXY"
+                  android:src="@drawable/radioroom_glass_stroke" />
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
                   android:orientation="horizontal"
-                  android:gravity="center_vertical">
+                  android:gravity="center_vertical"
+                  android:padding="10dp">
 
                   <ImageView
                       android:id="@+id/widget_artwork"
-                      android:layout_width="48dp"
-                      android:layout_height="48dp"
-                      android:src="@mipmap/ic_launcher"
+                      android:layout_width="54dp"
+                      android:layout_height="54dp"
                       android:scaleType="centerCrop"
-                      android:background="@drawable/radioroom_widget_slot_bg" />
+                      android:src="@mipmap/ic_launcher" />
 
                   <LinearLayout
                       android:id="@+id/widget_info_container"
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:layout_weight="1"
-                      android:orientation="vertical"
                       android:layout_marginStart="12dp"
-                      android:layout_marginEnd="8dp">
+                      android:layout_marginEnd="6dp"
+                      android:orientation="vertical">
 
                       <TextView
                           android:id="@+id/widget_title"
@@ -274,7 +439,7 @@ jobs:
                           android:layout_height="wrap_content"
                           android:text="Radio Room"
                           android:textColor="#FFFFFF"
-                          android:textSize="14sp"
+                          android:textSize="15sp"
                           android:textStyle="bold"
                           android:maxLines="1"
                           android:ellipsize="end" />
@@ -283,124 +448,80 @@ jobs:
                           android:id="@+id/widget_subtitle"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
-                          android:layout_marginTop="2dp"
                           android:text="Ready to Play"
-                          android:textColor="#9CA3AF"
+                          android:textColor="#B8FFFFFF"
                           android:textSize="12sp"
                           android:maxLines="1"
                           android:ellipsize="end" />
                   </LinearLayout>
 
-                  <!-- Media Controls -->
-                  <LinearLayout
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:gravity="center_vertical">
+                  <ImageView
+                      android:id="@+id/widget_btn_prev"
+                      android:layout_width="32dp"
+                      android:layout_height="32dp"
+                      android:padding="6dp"
+                      android:src="@drawable/ic_widget_prev"
+                      android:background="@drawable/radioroom_widget_circle_bg"
+                      android:contentDescription="Previous" />
 
-                      <ImageView
-                          android:id="@+id/widget_btn_prev"
-                          android:layout_width="34dp"
-                          android:layout_height="34dp"
-                          android:padding="6dp"
-                          android:src="@drawable/ic_widget_prev"
-                          android:background="@android:color/transparent"
-                          android:contentDescription="Previous" />
+                  <ImageView
+                      android:id="@+id/widget_btn_play"
+                      android:layout_width="40dp"
+                      android:layout_height="40dp"
+                      android:layout_marginStart="6dp"
+                      android:layout_marginEnd="6dp"
+                      android:padding="9dp"
+                      android:src="@drawable/ic_widget_play"
+                      android:background="@drawable/radioroom_widget_play_bg"
+                      android:contentDescription="Play/Pause" />
 
-                      <ImageView
-                          android:id="@+id/widget_btn_play"
-                          android:layout_width="38dp"
-                          android:layout_height="38dp"
-                          android:layout_marginStart="4dp"
-                          android:layout_marginEnd="4dp"
-                          android:padding="8dp"
-                          android:src="@drawable/ic_widget_play"
-                          android:background="@drawable/radioroom_widget_play_bg"
-                          android:contentDescription="Play/Pause" />
-
-                      <ImageView
-                          android:id="@+id/widget_btn_next"
-                          android:layout_width="34dp"
-                          android:layout_height="34dp"
-                          android:padding="6dp"
-                          android:src="@drawable/ic_widget_next"
-                          android:background="@android:color/transparent"
-                          android:contentDescription="Next" />
-                  </LinearLayout>
+                  <ImageView
+                      android:id="@+id/widget_btn_next"
+                      android:layout_width="32dp"
+                      android:layout_height="32dp"
+                      android:padding="6dp"
+                      android:src="@drawable/ic_widget_next"
+                      android:background="@drawable/radioroom_widget_circle_bg"
+                      android:contentDescription="Next" />
               </LinearLayout>
+          </FrameLayout>
+          EOF
 
-              <!-- Subtle Divider (plain <View> is NOT allowed in RemoteViews -> "Can't load widget";
-                   FrameLayout is allowed) -->
-              <FrameLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="1dp"
-                  android:layout_marginTop="8dp"
-                  android:layout_marginBottom="8dp"
-                  android:background="#22FFFFFF" />
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_glass_stroke.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <corners android:radius="28dp" />
+              <stroke android:width="1dp" android:color="#38FFFFFF" />
+          </shape>
+          EOF
 
-              <!-- Row 2: Recent Stations (Logos Only) -->
-              <LinearLayout
-                  android:id="@+id/widget_row_recents"
-                  android:layout_width="match_parent"
-                  android:layout_height="48dp"
-                  android:orientation="horizontal"
-                  android:gravity="center_vertical">
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_strip_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#1AFFFFFF" />
+              <corners android:radius="18dp" />
+              <stroke android:width="1dp" android:color="#24FFFFFF" />
+          </shape>
+          EOF
 
-                  <ImageView
-                      android:id="@+id/widget_recent_0"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
-                      android:layout_marginEnd="6dp"
-                      android:scaleType="fitCenter"
-                      android:padding="3dp"
-                      android:background="@drawable/radioroom_widget_slot_bg"
-                      android:visibility="gone" />
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_circle_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="oval">
+              <solid android:color="#26FFFFFF" />
+          </shape>
+          EOF
 
-                  <ImageView
-                      android:id="@+id/widget_recent_1"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
-                      android:layout_marginEnd="6dp"
-                      android:scaleType="fitCenter"
-                      android:padding="3dp"
-                      android:background="@drawable/radioroom_widget_slot_bg"
-                      android:visibility="gone" />
-
-                  <ImageView
-                      android:id="@+id/widget_recent_2"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
-                      android:layout_marginEnd="6dp"
-                      android:scaleType="fitCenter"
-                      android:padding="3dp"
-                      android:background="@drawable/radioroom_widget_slot_bg"
-                      android:visibility="gone" />
-
-                  <ImageView
-                      android:id="@+id/widget_recent_3"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
-                      android:layout_marginEnd="6dp"
-                      android:scaleType="fitCenter"
-                      android:padding="3dp"
-                      android:background="@drawable/radioroom_widget_slot_bg"
-                      android:visibility="gone" />
-
-                  <ImageView
-                      android:id="@+id/widget_recent_4"
-                      android:layout_width="0dp"
-                      android:layout_height="44dp"
-                      android:layout_weight="1"
-                      android:scaleType="fitCenter"
-                      android:padding="3dp"
-                      android:background="@drawable/radioroom_widget_slot_bg"
-                      android:visibility="gone" />
-              </LinearLayout>
-          </LinearLayout>
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_slot_active_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#202024" />
+              <corners android:radius="10dp" />
+              <stroke android:width="2dp" android:color="#FFFFFF" />
+          </shape>
           EOF
 
           cat << 'EOF' > android/app/src/main/java/com/radioroom/app/RadioRoomWidgetProvider.java
@@ -414,14 +535,17 @@ jobs:
           import android.content.Intent;
           import android.content.SharedPreferences;
           import android.graphics.Bitmap;
-          import android.graphics.BitmapFactory;
           import android.graphics.Canvas;
+          import android.graphics.LinearGradient;
           import android.graphics.Paint;
           import android.graphics.PorterDuff;
           import android.graphics.PorterDuffXfermode;
           import android.graphics.RectF;
-          import android.util.Base64;
+          import android.graphics.Shader;
+          import android.os.Build;
+          import android.os.Bundle;
           import android.util.Log;
+          import android.util.SizeF;
           import android.view.View;
           import android.widget.RemoteViews;
           import org.json.JSONArray;
@@ -430,12 +554,14 @@ jobs:
           import java.util.Map;
 
           public class RadioRoomWidgetProvider extends AppWidgetProvider {
+              private static final String TAG = "RadioRoomWidget";
               private static final String PREFS_NAME = "radioroom_widget_prefs";
               private static final String PREF_TITLE = "title";
               private static final String PREF_SUBTITLE = "subtitle";
               private static final String PREF_IS_PLAYING = "is_playing";
               private static final String PREF_RECENTS = "recents_json";
 
+              // Cover art, shrunk to <=256px so the RemoteViews bitmap budget is never an issue
               private static Bitmap cachedArtwork = null;
               private static final Map<String, Bitmap> logoBitmapCache = new HashMap<>();
 
@@ -444,6 +570,12 @@ jobs:
                   for (int widgetId : appWidgetIds) {
                       updateWidget(context, appWidgetManager, widgetId);
                   }
+              }
+
+              // Resizing the widget (e.g. 4x2 -> 4x1) re-renders it with the matching layout / background size
+              @Override
+              public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+                  updateWidget(context, appWidgetManager, appWidgetId);
               }
 
               public static void updatePlaybackState(Context context, String title, String subtitle, boolean isPlaying, Bitmap artwork) {
@@ -456,13 +588,13 @@ jobs:
                       editor.apply();
 
                       if (artwork != null) {
-                          cachedArtwork = artwork;
+                          cachedArtwork = scaleDown(artwork, 256);
                       } else if (!isPlaying) {
                           cachedArtwork = null;
                       }
 
                       updateAllWidgets(context);
-                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updatePlaybackState failed", t); }
+                  } catch (Throwable t) { Log.e(TAG, "updatePlaybackState failed", t); }
               }
 
               public static void updateRecentsOnly(Context context, String recentsJson) {
@@ -470,7 +602,7 @@ jobs:
                       SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                       prefs.edit().putString(PREF_RECENTS, recentsJson).apply();
                       updateAllWidgets(context);
-                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updateRecentsOnly failed", t); }
+                  } catch (Throwable t) { Log.e(TAG, "updateRecentsOnly failed", t); }
               }
 
               public static void updateAllWidgets(Context context) {
@@ -483,98 +615,130 @@ jobs:
                               updateWidget(context, manager, widgetId);
                           }
                       }
-                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updateAllWidgets failed", t); }
+                  } catch (Throwable t) { Log.e(TAG, "updateAllWidgets failed", t); }
               }
 
-              private static void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetId) {
+              private static void updateWidget(Context context, AppWidgetManager manager, int widgetId) {
                   try {
-                      RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.radioroom_widget);
                       SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
                       String title = prefs.getString(PREF_TITLE, "Radio Room");
                       String subtitle = prefs.getString(PREF_SUBTITLE, "Ready to Play");
                       boolean isPlaying = prefs.getBoolean(PREF_IS_PLAYING, false);
                       String recentsJson = prefs.getString(PREF_RECENTS, "[]");
 
-                      views.setTextViewText(R.id.widget_title, title);
-                      views.setTextViewText(R.id.widget_subtitle, subtitle);
+                      int widthDp = 250;
+                      try {
+                          Bundle opts = manager.getAppWidgetOptions(widgetId);
+                          if (opts != null) widthDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250);
+                      } catch (Throwable ignored) {}
+                      if (widthDp < 120) widthDp = 250;
 
-                      views.setImageViewResource(R.id.widget_btn_play, isPlaying ? R.drawable.ic_widget_pause : R.drawable.ic_widget_play);
-
-                      if (cachedArtwork != null) {
-                          Bitmap rounded = getRoundedCornerBitmap(context, cachedArtwork, 8);
-                          views.setImageViewBitmap(R.id.widget_artwork, rounded);
+                      RemoteViews views;
+                      if (Build.VERSION.SDK_INT >= 31) {
+                          // Android 12+: the launcher picks the layout that fits the size the user resized the widget to
+                          Map<SizeF, RemoteViews> map = new HashMap<>();
+                          map.put(new SizeF(120f, 40f), build(context, true, widthDp, title, subtitle, isPlaying, recentsJson));
+                          map.put(new SizeF(120f, 150f), build(context, false, widthDp, title, subtitle, isPlaying, recentsJson));
+                          views = new RemoteViews(map);
                       } else {
-                          views.setImageViewResource(R.id.widget_artwork, R.mipmap.ic_launcher);
+                          views = build(context, false, widthDp, title, subtitle, isPlaying, recentsJson);
                       }
+                      manager.updateAppWidget(widgetId, views);
+                  } catch (Throwable t) { Log.e(TAG, "updateWidget failed for id " + widgetId, t); }
+              }
 
-                      Intent openAppIntent = new Intent(context, MainActivity.class);
-                      openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                      PendingIntent openAppPending = PendingIntent.getActivity(
-                          context, 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                      );
-                      views.setOnClickPendingIntent(R.id.widget_artwork, openAppPending);
-                      views.setOnClickPendingIntent(R.id.widget_info_container, openAppPending);
+              private static RemoteViews build(Context context, boolean compact, int widthDp, String title, String subtitle, boolean isPlaying, String recentsJson) {
+                  RemoteViews v = new RemoteViews(context.getPackageName(), compact ? R.layout.radioroom_widget_compact : R.layout.radioroom_widget);
+                  float density = context.getResources().getDisplayMetrics().density;
 
-                      PendingIntent prevPending = PendingIntent.getBroadcast(
-                          context, 1, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_PREV),
-                          PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                      );
-                      views.setOnClickPendingIntent(R.id.widget_btn_prev, prevPending);
+                  // Frosted-glass background built from the cover art (soft blur + dark glass tint + rounded corners)
+                  Bitmap bg = null;
+                  if (cachedArtwork != null) {
+                      float scale = Math.min(density, 1.5f);
+                      int w = Math.round(widthDp * scale);
+                      int h = Math.round((compact ? 84f : 176f) * scale);
+                      bg = buildGlassBackground(cachedArtwork, w, h, 28f * scale);
+                  }
+                  if (bg != null) v.setImageViewBitmap(R.id.widget_bg, bg);
+                  else v.setImageViewResource(R.id.widget_bg, R.drawable.radioroom_widget_bg);
 
-                      PendingIntent playPending = PendingIntent.getBroadcast(
-                          context, 2, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_PLAY_PAUSE),
-                          PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                      );
-                      views.setOnClickPendingIntent(R.id.widget_btn_play, playPending);
+                  String artist = subtitle == null ? "" : subtitle;
+                  String station = "";
+                  int dot = artist.indexOf('•');
+                  if (dot >= 0) {
+                      station = artist.substring(dot + 1).trim();
+                      artist = artist.substring(0, dot).trim();
+                  }
+                  v.setTextViewText(R.id.widget_title, title);
+                  v.setTextViewText(R.id.widget_subtitle, artist);
+                  if (!compact) {
+                      String live = isPlaying ? "LIVE" : "PAUSED";
+                      if (!station.isEmpty()) live += " · " + station.toUpperCase();
+                      v.setTextViewText(R.id.widget_live, live);
+                  }
 
-                      PendingIntent nextPending = PendingIntent.getBroadcast(
-                          context, 3, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_NEXT),
-                          PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                      );
-                      views.setOnClickPendingIntent(R.id.widget_btn_next, nextPending);
+                  v.setImageViewResource(R.id.widget_btn_play, isPlaying ? R.drawable.ic_widget_pause : R.drawable.ic_widget_play);
 
+                  if (cachedArtwork != null) {
+                      v.setImageViewBitmap(R.id.widget_artwork, getRoundedCornerBitmap(context, cachedArtwork, compact ? 14 : 18));
+                  } else {
+                      v.setImageViewResource(R.id.widget_artwork, R.mipmap.ic_launcher);
+                  }
+
+                  Intent openAppIntent = new Intent(context, MainActivity.class);
+                  openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                  PendingIntent openAppPending = PendingIntent.getActivity(
+                      context, 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                  );
+                  v.setOnClickPendingIntent(R.id.widget_artwork, openAppPending);
+                  v.setOnClickPendingIntent(R.id.widget_info_container, openAppPending);
+
+                  v.setOnClickPendingIntent(R.id.widget_btn_prev, PendingIntent.getBroadcast(
+                      context, 1, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_PREV),
+                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+                  v.setOnClickPendingIntent(R.id.widget_btn_play, PendingIntent.getBroadcast(
+                      context, 2, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_PLAY_PAUSE),
+                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+                  v.setOnClickPendingIntent(R.id.widget_btn_next, PendingIntent.getBroadcast(
+                      context, 3, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_NEXT),
+                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+
+                  if (!compact) {
                       int[] slotIds = new int[] {
-                          R.id.widget_recent_0,
-                          R.id.widget_recent_1,
-                          R.id.widget_recent_2,
-                          R.id.widget_recent_3,
-                          R.id.widget_recent_4
+                          R.id.widget_recent_0, R.id.widget_recent_1, R.id.widget_recent_2, R.id.widget_recent_3, R.id.widget_recent_4
                       };
+                      try {
+                          JSONArray recents = new JSONArray(recentsJson);
+                          for (int i = 0; i < slotIds.length; i++) {
+                              int slot = slotIds[i];
+                              if (i < recents.length()) {
+                                  JSONObject item = recents.getJSONObject(i);
+                                  final String stationId = item.optString("id");
+                                  String logo = item.optString("logo");
 
-                      JSONArray recents = new JSONArray(recentsJson);
-                      for (int i = 0; i < slotIds.length; i++) {
-                          int slotViewId = slotIds[i];
-                          if (i < recents.length()) {
-                              JSONObject item = recents.getJSONObject(i);
-                              final String stationId = item.optString("id");
-                              String logo = item.optString("logo");
+                                  Bitmap logoBmp = getStationLogoBitmap(context, stationId, logo);
+                                  if (logoBmp != null) {
+                                      v.setImageViewBitmap(slot, getRoundedCornerBitmap(context, logoBmp, 6));
+                                  } else {
+                                      v.setImageViewResource(slot, R.mipmap.ic_launcher);
+                                  }
+                                  // The most recent station is the one currently selected: ring it
+                                  v.setInt(slot, "setBackgroundResource", i == 0 ? R.drawable.radioroom_widget_slot_active_bg : R.drawable.radioroom_widget_slot_bg);
+                                  v.setViewVisibility(slot, View.VISIBLE);
 
-                              Bitmap logoBmp = getStationLogoBitmap(context, stationId, logo);
-                              if (logoBmp != null) {
-                                  Bitmap roundedLogo = getRoundedCornerBitmap(context, logoBmp, 6);
-                                  views.setImageViewBitmap(slotViewId, roundedLogo);
+                                  Intent selectIntent = new Intent(context, MediaActionReceiver.class);
+                                  selectIntent.setAction(MediaActionReceiver.ACTION_SELECT_STATION);
+                                  selectIntent.putExtra(MediaActionReceiver.EXTRA_STATION_ID, stationId);
+                                  v.setOnClickPendingIntent(slot, PendingIntent.getBroadcast(
+                                      context, 100 + i, selectIntent,
+                                      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
                               } else {
-                                  views.setImageViewResource(slotViewId, R.mipmap.ic_launcher);
+                                  v.setViewVisibility(slot, View.GONE);
                               }
-
-                              views.setViewVisibility(slotViewId, View.VISIBLE);
-
-                              Intent selectIntent = new Intent(context, MediaActionReceiver.class);
-                              selectIntent.setAction(MediaActionReceiver.ACTION_SELECT_STATION);
-                              selectIntent.putExtra(MediaActionReceiver.EXTRA_STATION_ID, stationId);
-                              PendingIntent selectPending = PendingIntent.getBroadcast(
-                                  context, 100 + i, selectIntent,
-                                  PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                              );
-                              views.setOnClickPendingIntent(slotViewId, selectPending);
-                          } else {
-                              views.setViewVisibility(slotViewId, View.GONE);
                           }
-                      }
-
-                      appWidgetManager.updateAppWidget(widgetId, views);
-                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updateWidget failed for id " + widgetId, t); }
+                      } catch (Throwable t) { Log.e(TAG, "recents failed", t); }
+                  }
+                  return v;
               }
 
               private static Bitmap getStationLogoBitmap(Context context, String id, String logo) {
@@ -585,13 +749,50 @@ jobs:
                       // logo is a bundled asset path (img/stations/x.jpg) or a legacy data URI
                       Bitmap bmp = AppImageLoader.load(context, logo);
                       if (bmp != null) {
-                          // Widgets go through a Binder too: keep logos small
-                          if (bmp.getWidth() > 160) bmp = Bitmap.createScaledBitmap(bmp, 160, 160 * bmp.getHeight() / Math.max(1, bmp.getWidth()), true);
+                          bmp = scaleDown(bmp, 160);
                           if (id != null) logoBitmapCache.put(id, bmp);
                       }
                       return bmp;
                   } catch (Throwable t) {}
                   return null;
+              }
+
+              private static Bitmap scaleDown(Bitmap src, int maxSide) {
+                  if (src == null) return null;
+                  int w = src.getWidth(), h = src.getHeight();
+                  int longest = Math.max(w, h);
+                  if (longest <= maxSide) return src;
+                  float f = maxSide / (float) longest;
+                  return Bitmap.createScaledBitmap(src, Math.max(1, Math.round(w * f)), Math.max(1, Math.round(h * f)), true);
+              }
+
+              // Widgets cannot blur what is behind them, so fake frosted glass: shrink the cover to a few pixels,
+              // stretch it back (= very soft blur), add a dark tint and a faint top highlight, round the corners.
+              private static Bitmap buildGlassBackground(Bitmap cover, int w, int h, float radiusPx) {
+                  try {
+                      Bitmap out = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                      Canvas c = new Canvas(out);
+                      Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+
+                      Bitmap tiny = Bitmap.createScaledBitmap(cover, 16, 16, true);
+                      Bitmap soft = Bitmap.createScaledBitmap(tiny, w, h, true);
+                      c.drawBitmap(soft, 0, 0, p);
+                      c.drawColor(0x9410101A);
+
+                      Paint hp = new Paint(Paint.ANTI_ALIAS_FLAG);
+                      hp.setShader(new LinearGradient(0, 0, 0, h * 0.55f, 0x2AFFFFFF, 0x00FFFFFF, Shader.TileMode.CLAMP));
+                      c.drawRect(0, 0, w, h * 0.55f, hp);
+
+                      Bitmap mask = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                      new Canvas(mask).drawRoundRect(new RectF(0, 0, w, h), radiusPx, radiusPx, new Paint(Paint.ANTI_ALIAS_FLAG));
+                      Paint mp = new Paint(Paint.ANTI_ALIAS_FLAG);
+                      mp.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+                      c.drawBitmap(mask, 0, 0, mp);
+                      return out;
+                  } catch (Throwable t) {
+                      Log.e(TAG, "buildGlassBackground failed", t);
+                      return null;
+                  }
               }
 
               private static Bitmap getRoundedCornerBitmap(Context context, Bitmap bitmap, float cornerRadiusDp) {
@@ -1165,7 +1366,7 @@ jobs:
               @Nullable
               private Bitmap loadStationIcon(String id) {
                   try {
-                      File f = new File(new File(getFilesDir(), "aa_icons"), id.replaceAll("[^A-Za-z0-9_-]", "_") + ".png");
+                      File f = new File(new File(getFilesDir(), "aa_icons2"), id.replaceAll("[^A-Za-z0-9_-]", "_") + ".png");
                       if (f.exists()) return BitmapFactory.decodeFile(f.getAbsolutePath());
                   } catch (Throwable t) {}
                   return null;
@@ -1766,7 +1967,7 @@ jobs:
                                   try {
                                       org.json.JSONArray in = new org.json.JSONArray(stationsJson);
                                       org.json.JSONArray slim = new org.json.JSONArray();
-                                      java.io.File dir = new java.io.File(getFilesDir(), "aa_icons");
+                                      java.io.File dir = new java.io.File(getFilesDir(), "aa_icons2");
                                       if (!dir.exists()) dir.mkdirs();
                                       for (int i = 0; i < in.length(); i++) {
                                           org.json.JSONObject s = in.getJSONObject(i);
@@ -1783,7 +1984,13 @@ jobs:
                                           if (!f.exists()) {
                                               android.graphics.Bitmap bmp = AppImageLoader.load(MainActivity.this, logo);
                                               if (bmp == null) continue;
-                                              android.graphics.Bitmap small = android.graphics.Bitmap.createScaledBitmap(bmp, 96, 96, true);
+                                              // Uniform tile: logo scaled to 96px on an opaque white square, so transparent
+                                              // logos don't turn black on the car display and every tile looks the same
+                                              android.graphics.Bitmap scaled = android.graphics.Bitmap.createScaledBitmap(bmp, 96, 96, true);
+                                              android.graphics.Bitmap small = android.graphics.Bitmap.createBitmap(96, 96, android.graphics.Bitmap.Config.ARGB_8888);
+                                              android.graphics.Canvas cv = new android.graphics.Canvas(small);
+                                              cv.drawColor(android.graphics.Color.WHITE);
+                                              cv.drawBitmap(scaled, 0, 0, null);
                                               try (java.io.FileOutputStream out = new java.io.FileOutputStream(f)) {
                                                   small.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
                                               }
