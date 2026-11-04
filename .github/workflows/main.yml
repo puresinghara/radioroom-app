@@ -329,8 +329,9 @@ jobs:
                   </LinearLayout>
               </LinearLayout>
 
-              <!-- Subtle Divider -->
-              <View
+              <!-- Subtle Divider (plain <View> is NOT allowed in RemoteViews -> "Can't load widget";
+                   FrameLayout is allowed) -->
+              <FrameLayout
                   android:layout_width="match_parent"
                   android:layout_height="1dp"
                   android:layout_marginTop="8dp"
@@ -420,6 +421,7 @@ jobs:
           import android.graphics.PorterDuffXfermode;
           import android.graphics.RectF;
           import android.util.Base64;
+          import android.util.Log;
           import android.view.View;
           import android.widget.RemoteViews;
           import org.json.JSONArray;
@@ -460,7 +462,7 @@ jobs:
                       }
 
                       updateAllWidgets(context);
-                  } catch (Throwable t) {}
+                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updatePlaybackState failed", t); }
               }
 
               public static void updateRecentsOnly(Context context, String recentsJson) {
@@ -468,7 +470,7 @@ jobs:
                       SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                       prefs.edit().putString(PREF_RECENTS, recentsJson).apply();
                       updateAllWidgets(context);
-                  } catch (Throwable t) {}
+                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updateRecentsOnly failed", t); }
               }
 
               public static void updateAllWidgets(Context context) {
@@ -481,7 +483,7 @@ jobs:
                               updateWidget(context, manager, widgetId);
                           }
                       }
-                  } catch (Throwable t) {}
+                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updateAllWidgets failed", t); }
               }
 
               private static void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetId) {
@@ -572,7 +574,7 @@ jobs:
                       }
 
                       appWidgetManager.updateAppWidget(widgetId, views);
-                  } catch (Throwable t) {}
+                  } catch (Throwable t) { Log.e("RadioRoomWidget", "updateWidget failed for id " + widgetId, t); }
               }
 
               private static Bitmap getStationLogoBitmap(Context context, String id, String logo) {
