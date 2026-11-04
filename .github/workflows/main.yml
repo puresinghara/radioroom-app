@@ -49,7 +49,7 @@ jobs:
           sed -i '/android.permission.INTERNET/a \    <uses-permission android:name="android.permission.WAKE_LOCK" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />' android/app/src/main/AndroidManifest.xml
           
           # Service & Receiver declarations inside <application>
-          sed -i '/<\/application>/i \    <service android:name="com.radioroom.app.MediaNotificationService" android:enabled="true" android:exported="false" android:foregroundServiceType="mediaPlayback" />\n    <receiver android:name="com.radioroom.app.MediaActionReceiver" android:enabled="true" android:exported="false" />' android/app/src/main/AndroidManifest.xml
+          sed -i '/<\/application>/i \    <service android:name="com.radioroom.app.MediaNotificationService" android:enabled="true" android:exported="true" android:foregroundServiceType="mediaPlayback"><intent-filter><action android:name="android.media.browse.MediaBrowserService" /></intent-filter></service>\n    <receiver android:name="com.radioroom.app.MediaActionReceiver" android:enabled="true" android:exported="false" />\n    <receiver android:name="com.radioroom.app.RadioRoomWidgetProvider" android:label="@string/app_name" android:enabled="true" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/radioroom_widget_info" /></receiver>\n    <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/automotive_app_desc" />' android/app/src/main/AndroidManifest.xml
 
       - name: Create Custom Background Media WebView Layout
         run: |
@@ -127,6 +127,561 @@ jobs:
           }
           EOF
 
+      - name: Create RadioRoom App Widget Resources and Provider
+        run: |
+          mkdir -p android/app/src/main/res/xml
+          mkdir -p android/app/src/main/res/drawable
+          mkdir -p android/app/src/main/res/layout
+
+          cat << 'EOF' > android/app/src/main/res/xml/radioroom_widget_info.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+              android:minWidth="180dp"
+              android:minHeight="80dp"
+              android:minResizeWidth="180dp"
+              android:minResizeHeight="80dp"
+              android:targetCellWidth="4"
+              android:targetCellHeight="2"
+              android:updatePeriodMillis="0"
+              android:initialLayout="@layout/radioroom_widget"
+              android:resizeMode="horizontal|vertical"
+              android:widgetCategory="home_screen"
+              android:description="@string/app_name" />
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/xml/automotive_app_desc.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <automotiveApp>
+              <uses name="media" />
+          </automotiveApp>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#F2141416" />
+              <corners android:radius="22dp" />
+              <stroke android:width="1dp" android:color="#33FFFFFF" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_slot_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#202024" />
+              <corners android:radius="10dp" />
+              <stroke android:width="1dp" android:color="#2AFFFFFF" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/radioroom_widget_play_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="oval">
+              <solid android:color="#FFFFFFFF" />
+          </shape>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/ic_widget_play.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp"
+              android:height="24dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+            <path
+                android:fillColor="#121214"
+                android:pathData="M8,5v14l11,-7z"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/ic_widget_pause.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp"
+              android:height="24dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+            <path
+                android:fillColor="#121214"
+                android:pathData="M6,19h4V5H6v14zm8,-14v14h4V5h-4z"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/ic_widget_prev.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp"
+              android:height="24dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+            <path
+                android:fillColor="#E4E4E7"
+                android:pathData="M6,6h2v12H6zm3.5,6l8.5,6V6z"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/drawable/ic_widget_next.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp"
+              android:height="24dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+            <path
+                android:fillColor="#E4E4E7"
+                android:pathData="M6,18l8.5,-6L6,6v12zM16,6v12h2V6h-2z"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/res/layout/radioroom_widget.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/widget_root"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="14dp"
+              android:background="@drawable/radioroom_widget_bg">
+
+              <!-- Row 1: Now Playing Controller -->
+              <LinearLayout
+                  android:id="@+id/widget_row_top"
+                  android:layout_width="match_parent"
+                  android:layout_height="0dp"
+                  android:layout_weight="1"
+                  android:orientation="horizontal"
+                  android:gravity="center_vertical">
+
+                  <ImageView
+                      android:id="@+id/widget_artwork"
+                      android:layout_width="48dp"
+                      android:layout_height="48dp"
+                      android:src="@mipmap/ic_launcher"
+                      android:scaleType="centerCrop"
+                      android:background="@drawable/radioroom_widget_slot_bg" />
+
+                  <LinearLayout
+                      android:id="@+id/widget_info_container"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:orientation="vertical"
+                      android:layout_marginStart="12dp"
+                      android:layout_marginEnd="8dp">
+
+                      <TextView
+                          android:id="@+id/widget_title"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:text="Radio Room"
+                          android:textColor="#FFFFFF"
+                          android:textSize="14sp"
+                          android:textStyle="bold"
+                          android:maxLines="1"
+                          android:ellipsize="end" />
+
+                      <TextView
+                          android:id="@+id/widget_subtitle"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginTop="2dp"
+                          android:text="Ready to Play"
+                          android:textColor="#9CA3AF"
+                          android:textSize="12sp"
+                          android:maxLines="1"
+                          android:ellipsize="end" />
+                  </LinearLayout>
+
+                  <!-- Media Controls -->
+                  <LinearLayout
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:gravity="center_vertical">
+
+                      <ImageView
+                          android:id="@+id/widget_btn_prev"
+                          android:layout_width="34dp"
+                          android:layout_height="34dp"
+                          android:padding="6dp"
+                          android:src="@drawable/ic_widget_prev"
+                          android:background="@android:color/transparent"
+                          android:contentDescription="Previous" />
+
+                      <ImageView
+                          android:id="@+id/widget_btn_play"
+                          android:layout_width="38dp"
+                          android:layout_height="38dp"
+                          android:layout_marginStart="4dp"
+                          android:layout_marginEnd="4dp"
+                          android:padding="8dp"
+                          android:src="@drawable/ic_widget_play"
+                          android:background="@drawable/radioroom_widget_play_bg"
+                          android:contentDescription="Play/Pause" />
+
+                      <ImageView
+                          android:id="@+id/widget_btn_next"
+                          android:layout_width="34dp"
+                          android:layout_height="34dp"
+                          android:padding="6dp"
+                          android:src="@drawable/ic_widget_next"
+                          android:background="@android:color/transparent"
+                          android:contentDescription="Next" />
+                  </LinearLayout>
+              </LinearLayout>
+
+              <!-- Subtle Divider -->
+              <View
+                  android:layout_width="match_parent"
+                  android:layout_height="1dp"
+                  android:layout_marginTop="8dp"
+                  android:layout_marginBottom="8dp"
+                  android:background="#22FFFFFF" />
+
+              <!-- Row 2: Recent Stations (Logos Only) -->
+              <LinearLayout
+                  android:id="@+id/widget_row_recents"
+                  android:layout_width="match_parent"
+                  android:layout_height="48dp"
+                  android:orientation="horizontal"
+                  android:gravity="center_vertical">
+
+                  <ImageView
+                      android:id="@+id/widget_recent_0"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="6dp"
+                      android:scaleType="fitCenter"
+                      android:padding="3dp"
+                      android:background="@drawable/radioroom_widget_slot_bg"
+                      android:visibility="gone" />
+
+                  <ImageView
+                      android:id="@+id/widget_recent_1"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="6dp"
+                      android:scaleType="fitCenter"
+                      android:padding="3dp"
+                      android:background="@drawable/radioroom_widget_slot_bg"
+                      android:visibility="gone" />
+
+                  <ImageView
+                      android:id="@+id/widget_recent_2"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="6dp"
+                      android:scaleType="fitCenter"
+                      android:padding="3dp"
+                      android:background="@drawable/radioroom_widget_slot_bg"
+                      android:visibility="gone" />
+
+                  <ImageView
+                      android:id="@+id/widget_recent_3"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:layout_marginEnd="6dp"
+                      android:scaleType="fitCenter"
+                      android:padding="3dp"
+                      android:background="@drawable/radioroom_widget_slot_bg"
+                      android:visibility="gone" />
+
+                  <ImageView
+                      android:id="@+id/widget_recent_4"
+                      android:layout_width="0dp"
+                      android:layout_height="44dp"
+                      android:layout_weight="1"
+                      android:scaleType="fitCenter"
+                      android:padding="3dp"
+                      android:background="@drawable/radioroom_widget_slot_bg"
+                      android:visibility="gone" />
+              </LinearLayout>
+          </LinearLayout>
+          EOF
+
+          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/RadioRoomWidgetProvider.java
+          package com.radioroom.app;
+
+          import android.app.PendingIntent;
+          import android.appwidget.AppWidgetManager;
+          import android.appwidget.AppWidgetProvider;
+          import android.content.ComponentName;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.graphics.Bitmap;
+          import android.graphics.BitmapFactory;
+          import android.graphics.Canvas;
+          import android.graphics.Paint;
+          import android.graphics.PorterDuff;
+          import android.graphics.PorterDuffXfermode;
+          import android.graphics.RectF;
+          import android.util.Base64;
+          import android.view.View;
+          import android.widget.RemoteViews;
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+          import java.util.HashMap;
+          import java.util.Map;
+
+          public class RadioRoomWidgetProvider extends AppWidgetProvider {
+              private static final String PREFS_NAME = "radioroom_widget_prefs";
+              private static final String PREF_TITLE = "title";
+              private static final String PREF_SUBTITLE = "subtitle";
+              private static final String PREF_IS_PLAYING = "is_playing";
+              private static final String PREF_RECENTS = "recents_json";
+
+              private static Bitmap cachedArtwork = null;
+              private static final Map<String, Bitmap> logoBitmapCache = new HashMap<>();
+
+              @Override
+              public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+                  for (int widgetId : appWidgetIds) {
+                      updateWidget(context, appWidgetManager, widgetId);
+                  }
+              }
+
+              public static void updatePlaybackState(Context context, String title, String subtitle, boolean isPlaying, Bitmap artwork) {
+                  try {
+                      SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                      SharedPreferences.Editor editor = prefs.edit();
+                      if (title != null) editor.putString(PREF_TITLE, title);
+                      if (subtitle != null) editor.putString(PREF_SUBTITLE, subtitle);
+                      editor.putBoolean(PREF_IS_PLAYING, isPlaying);
+                      editor.apply();
+
+                      if (artwork != null) {
+                          cachedArtwork = artwork;
+                      } else if (!isPlaying) {
+                          cachedArtwork = null;
+                      }
+
+                      updateAllWidgets(context);
+                  } catch (Throwable t) {}
+              }
+
+              public static void updateRecentsOnly(Context context, String recentsJson) {
+                  try {
+                      SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                      prefs.edit().putString(PREF_RECENTS, recentsJson).apply();
+                      updateAllWidgets(context);
+                  } catch (Throwable t) {}
+              }
+
+              public static void updateAllWidgets(Context context) {
+                  try {
+                      AppWidgetManager manager = AppWidgetManager.getInstance(context);
+                      ComponentName thisWidget = new ComponentName(context, RadioRoomWidgetProvider.class);
+                      int[] allWidgetIds = manager.getAppWidgetIds(thisWidget);
+                      if (allWidgetIds != null && allWidgetIds.length > 0) {
+                          for (int widgetId : allWidgetIds) {
+                              updateWidget(context, manager, widgetId);
+                          }
+                      }
+                  } catch (Throwable t) {}
+              }
+
+              private static void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetId) {
+                  try {
+                      RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.radioroom_widget);
+                      SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+                      String title = prefs.getString(PREF_TITLE, "Radio Room");
+                      String subtitle = prefs.getString(PREF_SUBTITLE, "Ready to Play");
+                      boolean isPlaying = prefs.getBoolean(PREF_IS_PLAYING, false);
+                      String recentsJson = prefs.getString(PREF_RECENTS, "[]");
+
+                      views.setTextViewText(R.id.widget_title, title);
+                      views.setTextViewText(R.id.widget_subtitle, subtitle);
+
+                      views.setImageViewResource(R.id.widget_btn_play, isPlaying ? R.drawable.ic_widget_pause : R.drawable.ic_widget_play);
+
+                      if (cachedArtwork != null) {
+                          Bitmap rounded = getRoundedCornerBitmap(context, cachedArtwork, 8);
+                          views.setImageViewBitmap(R.id.widget_artwork, rounded);
+                      } else {
+                          views.setImageViewResource(R.id.widget_artwork, R.mipmap.ic_launcher);
+                      }
+
+                      Intent openAppIntent = new Intent(context, MainActivity.class);
+                      openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                      PendingIntent openAppPending = PendingIntent.getActivity(
+                          context, 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                      );
+                      views.setOnClickPendingIntent(R.id.widget_artwork, openAppPending);
+                      views.setOnClickPendingIntent(R.id.widget_info_container, openAppPending);
+
+                      PendingIntent prevPending = PendingIntent.getBroadcast(
+                          context, 1, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_PREV),
+                          PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                      );
+                      views.setOnClickPendingIntent(R.id.widget_btn_prev, prevPending);
+
+                      PendingIntent playPending = PendingIntent.getBroadcast(
+                          context, 2, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_PLAY_PAUSE),
+                          PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                      );
+                      views.setOnClickPendingIntent(R.id.widget_btn_play, playPending);
+
+                      PendingIntent nextPending = PendingIntent.getBroadcast(
+                          context, 3, new Intent(context, MediaActionReceiver.class).setAction(MediaNotificationService.ACTION_NEXT),
+                          PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                      );
+                      views.setOnClickPendingIntent(R.id.widget_btn_next, nextPending);
+
+                      int[] slotIds = new int[] {
+                          R.id.widget_recent_0,
+                          R.id.widget_recent_1,
+                          R.id.widget_recent_2,
+                          R.id.widget_recent_3,
+                          R.id.widget_recent_4
+                      };
+
+                      JSONArray recents = new JSONArray(recentsJson);
+                      for (int i = 0; i < slotIds.length; i++) {
+                          int slotViewId = slotIds[i];
+                          if (i < recents.length()) {
+                              JSONObject item = recents.getJSONObject(i);
+                              final String stationId = item.optString("id");
+                              String logo = item.optString("logo");
+
+                              Bitmap logoBmp = getStationLogoBitmap(context, stationId, logo);
+                              if (logoBmp != null) {
+                                  Bitmap roundedLogo = getRoundedCornerBitmap(context, logoBmp, 6);
+                                  views.setImageViewBitmap(slotViewId, roundedLogo);
+                              } else {
+                                  views.setImageViewResource(slotViewId, R.mipmap.ic_launcher);
+                              }
+
+                              views.setViewVisibility(slotViewId, View.VISIBLE);
+
+                              Intent selectIntent = new Intent(context, MediaActionReceiver.class);
+                              selectIntent.setAction(MediaActionReceiver.ACTION_SELECT_STATION);
+                              selectIntent.putExtra(MediaActionReceiver.EXTRA_STATION_ID, stationId);
+                              PendingIntent selectPending = PendingIntent.getBroadcast(
+                                  context, 100 + i, selectIntent,
+                                  PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                              );
+                              views.setOnClickPendingIntent(slotViewId, selectPending);
+                          } else {
+                              views.setViewVisibility(slotViewId, View.GONE);
+                          }
+                      }
+
+                      appWidgetManager.updateAppWidget(widgetId, views);
+                  } catch (Throwable t) {}
+              }
+
+              private static Bitmap getStationLogoBitmap(Context context, String id, String logo) {
+                  if (id != null && logoBitmapCache.containsKey(id)) {
+                      return logoBitmapCache.get(id);
+                  }
+                  try {
+                      // logo is a bundled asset path (img/stations/x.jpg) or a legacy data URI
+                      Bitmap bmp = AppImageLoader.load(context, logo);
+                      if (bmp != null) {
+                          // Widgets go through a Binder too: keep logos small
+                          if (bmp.getWidth() > 160) bmp = Bitmap.createScaledBitmap(bmp, 160, 160 * bmp.getHeight() / Math.max(1, bmp.getWidth()), true);
+                          if (id != null) logoBitmapCache.put(id, bmp);
+                      }
+                      return bmp;
+                  } catch (Throwable t) {}
+                  return null;
+              }
+
+              private static Bitmap getRoundedCornerBitmap(Context context, Bitmap bitmap, float cornerRadiusDp) {
+                  if (bitmap == null) return null;
+                  try {
+                      float density = context.getResources().getDisplayMetrics().density;
+                      float px = cornerRadiusDp * density;
+                      Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                      Canvas canvas = new Canvas(output);
+                      Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+                      RectF rectF = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                      canvas.drawRoundRect(rectF, px, px, paint);
+                      paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+                      canvas.drawBitmap(bitmap, 0, 0, paint);
+                      return output;
+                  } catch (Throwable t) {
+                      return bitmap;
+                  }
+              }
+          }
+          EOF
+
+      - name: Create AppImageLoader (station logos bundled in assets/public/img)
+        run: |
+          cat << 'EOF' > android/app/src/main/java/com/radioroom/app/AppImageLoader.java
+          package com.radioroom.app;
+
+          import android.content.Context;
+          import android.graphics.Bitmap;
+          import android.graphics.BitmapFactory;
+          import android.util.Base64;
+          import java.io.InputStream;
+
+          // Logos used to be inlined as base64 data URIs in index.html (2 MB). They now live in
+          // www/img/..., which Capacitor copies to assets/public/img/... This resolves any image
+          // reference the web layer hands to native code:
+          //   data:image/...;base64,...           -> decoded
+          //   img/stations/x.jpg (relative)       -> assets/public/img/stations/x.jpg
+          //   https://localhost/img/stations/x.jpg -> same (Capacitor's local origin)
+          //   anything else (remote http/https)  -> null (caller downloads it)
+          public final class AppImageLoader {
+              private AppImageLoader() {}
+
+              public static boolean isLocal(String src) {
+                  return assetPath(src) != null;
+              }
+
+              public static Bitmap load(Context ctx, String src) {
+                  if (src == null) return null;
+                  src = src.trim();
+                  if (src.isEmpty()) return null;
+                  try {
+                      if (src.startsWith("data:image")) {
+                          int comma = src.indexOf(',');
+                          if (comma < 0) return null;
+                          byte[] bytes = Base64.decode(src.substring(comma + 1), Base64.DEFAULT);
+                          return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                      }
+                      String path = assetPath(src);
+                      if (path == null) return null;
+                      try (InputStream in = ctx.getAssets().open("public/" + path)) {
+                          return BitmapFactory.decodeStream(in);
+                      }
+                  } catch (Throwable t) {
+                      return null;
+                  }
+              }
+
+              private static String assetPath(String src) {
+                  if (src == null) return null;
+                  String s = src.trim();
+                  if (s.isEmpty() || s.startsWith("data:")) return null;
+                  String[] localPrefixes = { "https://localhost/", "http://localhost/", "capacitor://localhost/" };
+                  for (String p : localPrefixes) {
+                      if (s.startsWith(p)) { s = s.substring(p.length()); return clean(s); }
+                  }
+                  if (s.contains("://")) return null; // remote URL
+                  return clean(s);
+              }
+
+              private static String clean(String s) {
+                  int q = s.indexOf('?'); if (q >= 0) s = s.substring(0, q);
+                  int h = s.indexOf('#'); if (h >= 0) s = s.substring(0, h);
+                  while (s.startsWith("./")) s = s.substring(2);
+                  while (s.startsWith("/")) s = s.substring(1);
+                  if (s.isEmpty() || s.contains("..")) return null;
+                  try { s = java.net.URLDecoder.decode(s, "UTF-8"); } catch (Throwable ignored) {}
+                  return s;
+              }
+          }
+          EOF
+
       - name: Create Native Media Notification Service with MediaSession
         run: |
           cat << 'EOF' > android/app/src/main/java/com/radioroom/app/MediaNotificationService.java
@@ -137,27 +692,57 @@ jobs:
           import android.app.NotificationManager;
           import android.app.PendingIntent;
           import android.app.Service;
+          import android.content.BroadcastReceiver;
           import android.content.Context;
           import android.content.Intent;
+          import android.content.IntentFilter;
           import android.graphics.Bitmap;
           import android.graphics.BitmapFactory;
           import android.media.AudioAttributes;
+          import android.media.AudioDeviceCallback;
+          import android.media.AudioDeviceInfo;
           import android.media.AudioFocusRequest;
           import android.media.AudioManager;
           import android.os.Build;
-          import android.os.IBinder;
+          import android.os.Bundle;
+          import android.os.Handler;
+          import android.os.Looper;
           import android.os.PowerManager;
+          import android.support.v4.media.MediaBrowserCompat;
+          import android.support.v4.media.MediaDescriptionCompat;
           import android.support.v4.media.MediaMetadataCompat;
           import android.support.v4.media.session.MediaSessionCompat;
           import android.support.v4.media.session.PlaybackStateCompat;
+          import android.util.Log;
+          import androidx.annotation.NonNull;
+          import androidx.annotation.Nullable;
           import androidx.core.app.NotificationCompat;
+          import androidx.core.content.ContextCompat;
+          import androidx.media.MediaBrowserServiceCompat;
           import androidx.media.app.NotificationCompat.MediaStyle;
           import com.radioroom.app.R;
+          import java.io.File;
           import java.io.InputStream;
           import java.net.HttpURLConnection;
           import java.net.URL;
+          import java.util.ArrayList;
+          import java.util.List;
+          import org.json.JSONArray;
+          import org.json.JSONObject;
 
-          public class MediaNotificationService extends Service {
+          // MediaBrowserServiceCompat (not plain Service) so Android Auto can discover and browse the app
+          public class MediaNotificationService extends MediaBrowserServiceCompat {
+              private static final String TAG = "RadioRoomMedia";
+              public static volatile boolean isRunning = false;
+              private static volatile MediaNotificationService instance = null;
+
+              // Android Auto browse tree
+              public static final String STATIONS_PREFS = "radioroom_auto_prefs";
+              public static final String PREF_STATIONS = "stations_json";
+              private static final String BROWSE_ROOT = "__ROOT__";
+              private static final String BROWSE_RECENT = "__RECENT__";
+              private static final String BROWSE_THAI = "__THAI__";
+              private static final String BROWSE_GLOBAL = "__GLOBAL__";
               private static final String CHANNEL_ID = "radioroom_playback_channel";
               private static final int NOTIFICATION_ID = 1001;
               
@@ -185,88 +770,540 @@ jobs:
               private String currentSubtitle = "Live";
               private String currentArtworkUrl = "";
               private Bitmap currentArtworkBitmap = null;
-              private boolean isPlaying = true;
+              // false by default: Android Auto can create this service just to browse, before anything plays
+              private boolean isPlaying = false;
+              // true while playback is paused because of a phone/VoIP call or transient focus loss;
+              // in this state we keep our focus request alive so we get AUDIOFOCUS_GAIN afterwards
+              private boolean interruptedByCall = false;
+              private boolean hasAudioFocus = false;
+              private boolean isDucked = false;
+
+              private BroadcastReceiver becomingNoisyReceiver = null;
+              private boolean isNoisyReceiverRegistered = false;
+              private AudioDeviceCallback audioDeviceCallback = null;
+              private boolean isAudioDeviceCallbackRegistered = false;
+
+              private static final String JS_STOP = "(() => { if (typeof window.stopAudio === 'function') window.stopAudio(); else { const a = document.getElementById('audioElement'); if (a) { a.pause(); a.removeAttribute('src'); a.load(); } } })()";
+              private static final String JS_PAUSE_FOR_CALL = "(() => { if (typeof window.pauseForInterruption === 'function') window.pauseForInterruption(); else if (typeof window.stopAudio === 'function') window.stopAudio(); })()";
+              private static final String JS_RESUME_AFTER_CALL = "(() => { if (typeof window.resumeAfterInterruption === 'function') window.resumeAfterInterruption(); else if (typeof window.startAudio === 'function') window.startAudio(); })()";
+
+              // Call detection via AudioManager mode. Works for cellular AND VoIP calls (LINE, WhatsApp, Messenger)
+              // and does not depend on us holding audio focus. Needs no extra permission.
+              private final Handler mainHandler = new Handler(Looper.getMainLooper());
+              private boolean modePollRunning = false;
+              private int normalModeStreak = 0;
+              private static final long MODE_POLL_MS = 1000;
+              private final Runnable modePollRunnable = new Runnable() {
+                  @Override
+                  public void run() {
+                      if (!modePollRunning) return;
+                      checkCallState();
+                      if (isPlaying || interruptedByCall) {
+                          mainHandler.postDelayed(this, MODE_POLL_MS);
+                      } else {
+                          modePollRunning = false;
+                      }
+                  }
+              };
+
+              private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+                  @Override
+                  public void onAudioFocusChange(int focusChange) {
+                      Log.d(TAG, "onAudioFocusChange " + focusChange + " isPlaying=" + isPlaying);
+                      switch (focusChange) {
+                          case AudioManager.AUDIOFOCUS_LOSS:
+                              // Another media app took over permanently: behave like the user pressed stop
+                              hasAudioFocus = false;
+                              interruptedByCall = false;
+                              isPlaying = false;
+                              updateMediaSessionState();
+                              triggerWeb(JS_STOP);
+                              break;
+                          case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                              // Incoming call ringtone, voice assistant, etc.
+                              hasAudioFocus = false;
+                              if (isPlaying) pauseForInterruption();
+                              break;
+                          case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                              // Navigation prompt / notification sound: lower volume instead of tearing down the stream.
+                              // (On Android 8+ the system ducks automatically because setWillPauseWhenDucked(false).)
+                              if (isPlaying && !isDucked) {
+                                  isDucked = true;
+                                  triggerWeb("(() => { if (typeof window.rrDuck === 'function') window.rrDuck(true); })()");
+                              }
+                              break;
+                          case AudioManager.AUDIOFOCUS_GAIN:
+                              hasAudioFocus = true;
+                              if (isDucked) {
+                                  isDucked = false;
+                                  triggerWeb("(() => { if (typeof window.rrDuck === 'function') window.rrDuck(false); })()");
+                              }
+                              if (interruptedByCall && !isInCallMode()) {
+                                  resumeAfterInterruption();
+                              }
+                              break;
+                      }
+                  }
+              };
+
+              private boolean isInCallMode() {
+                  try {
+                      if (audioManager == null) audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                      if (audioManager == null) return false;
+                      int mode = audioManager.getMode();
+                      // RINGTONE(1), IN_CALL(2), IN_COMMUNICATION(3), CALL_SCREENING(4), CALL_REDIRECT(5), COMMUNICATION_REDIRECT(6)
+                      return mode >= AudioManager.MODE_RINGTONE;
+                  } catch (Throwable t) {
+                      return false;
+                  }
+              }
+
+              private void checkCallState() {
+                  boolean inCall = isInCallMode();
+                  if (inCall) {
+                      normalModeStreak = 0;
+                      if (isPlaying && !interruptedByCall) {
+                          Log.d(TAG, "Call detected via audio mode, pausing");
+                          pauseForInterruption();
+                      }
+                  } else if (interruptedByCall) {
+                      // Wait ~2s of normal mode so the in-call audio route has been torn down
+                      normalModeStreak++;
+                      if (normalModeStreak >= 2) {
+                          resumeAfterInterruption();
+                      }
+                  }
+              }
+
+              private void startModePolling() {
+                  if (modePollRunning) return;
+                  modePollRunning = true;
+                  normalModeStreak = 0;
+                  mainHandler.postDelayed(modePollRunnable, MODE_POLL_MS);
+              }
+
+              private void stopModePolling() {
+                  modePollRunning = false;
+                  mainHandler.removeCallbacks(modePollRunnable);
+              }
+
+              private long interruptedAt = 0;
+
+              private void pauseForInterruption() {
+                  interruptedByCall = true;
+                  interruptedAt = System.currentTimeMillis();
+                  normalModeStreak = 0;
+                  isPlaying = false;
+                  updateMediaSessionState();
+                  triggerWeb(JS_PAUSE_FOR_CALL);
+                  startModePolling();
+              }
+
+              private void resumeAfterInterruption() {
+                  if (!interruptedByCall) return;
+                  interruptedByCall = false;
+                  normalModeStreak = 0;
+                  Log.d(TAG, "Interruption over, resuming");
+                  triggerWeb(JS_RESUME_AFTER_CALL);
+              }
 
               @Override
               public void onCreate() {
                   super.onCreate();
+                  isRunning = true;
+                  instance = this;
                   createNotificationChannel();
+                  audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
+                  // Wake lock is acquired only when playback actually starts (see onStartCommand),
+                  // not when Android Auto merely binds to browse stations.
                   try {
                       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
                       if (pm != null) {
                           wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RadioRoom:AudioPlaybackWakeLock");
                           wakeLock.setReferenceCounted(false);
-                          wakeLock.acquire(24 * 60 * 60 * 1000L);
                       }
                   } catch (Throwable t) {}
 
-                  requestAudioFocus();
+                  becomingNoisyReceiver = new BroadcastReceiver() {
+                      @Override
+                      public void onReceive(Context context, Intent intent) {
+                          if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+                              interruptedByCall = false;
+                              isPlaying = false;
+                              updateMediaSessionState();
+                              triggerWeb(JS_STOP);
+                          }
+                      }
+                  };
 
                   try {
                       mediaSession = new MediaSessionCompat(this, "RadioRoomMediaSession");
+                      mediaSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
                       mediaSession.setActive(true);
                       mediaSession.setCallback(new MediaSessionCompat.Callback() {
                           @Override
                           public void onPlay() {
-                              triggerWeb("if (typeof startAudio === 'function') startAudio(); else document.getElementById('playBtn').click();");
+                              interruptedByCall = false;
+                              runJsOrLaunchApp("if (typeof window.startAudio === 'function') window.startAudio(); else document.getElementById('playBtn').click();", null);
                           }
 
                           @Override
                           public void onPause() {
-                              triggerWeb("if (typeof stopAudio === 'function') stopAudio(); else document.getElementById('playBtn').click();");
+                              interruptedByCall = false;
+                              triggerWeb("if (typeof window.stopAudio === 'function') window.stopAudio(); else document.getElementById('playBtn').click();");
                           }
 
                           @Override
                           public void onSkipToNext() {
-                              triggerWeb("if (typeof nextTrack === 'function') nextTrack(); else document.getElementById('nextBtn').click();");
+                              triggerWeb("if (typeof window.nextTrack === 'function') window.nextTrack(); else document.getElementById('nextBtn').click();");
                           }
 
                           @Override
                           public void onSkipToPrevious() {
-                              triggerWeb("if (typeof prevTrack === 'function') prevTrack(); else document.getElementById('prevBtn').click();");
+                              triggerWeb("if (typeof window.prevTrack === 'function') window.prevTrack(); else document.getElementById('prevBtn').click();");
                           }
 
                           @Override
                           public void onStop() {
-                              triggerWeb("if (typeof stopAudio === 'function') stopAudio();");
-                              stopSelf();
+                              interruptedByCall = false;
+                              triggerWeb("if (typeof window.stopAudio === 'function') window.stopAudio();");
+                          }
+
+                          // Android Auto: user tapped a station in the browse list
+                          @Override
+                          public void onPlayFromMediaId(String mediaId, Bundle extras) {
+                              if (mediaId == null || mediaId.startsWith("__")) return;
+                              interruptedByCall = false;
+                              runJsOrLaunchApp("if (typeof selectStationById === 'function') selectStationById(" + JSONObject.quote(mediaId) + ", true);", mediaId);
+                          }
+
+                          // Android Auto / Google Assistant: "Play <station> on Radio Room"
+                          @Override
+                          public void onPlayFromSearch(String query, Bundle extras) {
+                              interruptedByCall = false;
+                              String id = findStationIdForQuery(query);
+                              if (id != null) {
+                                  runJsOrLaunchApp("if (typeof selectStationById === 'function') selectStationById(" + JSONObject.quote(id) + ", true);", id);
+                              } else {
+                                  runJsOrLaunchApp("if (typeof window.startAudio === 'function') window.startAudio();", null);
+                              }
                           }
                       });
+                      // Lets Android Auto / MediaBrowser clients connect to this session
+                      setSessionToken(mediaSession.getSessionToken());
+                  } catch (Throwable t) {
+                      Log.e(TAG, "MediaSession init failed", t);
+                  }
+              }
+
+              // Playback lives in the WebView. If the app UI was never opened (e.g. started from Android Auto
+              // straight after boot), try to bring MainActivity up so the WebView exists.
+              private boolean runJsOrLaunchApp(String js, @Nullable String stationId) {
+                  android.webkit.WebView webView = MainActivity.getAppWebView();
+                  if (webView != null) {
+                      triggerWeb(js);
+                      return true;
+                  }
+                  try {
+                      Intent launch = new Intent(this, MainActivity.class);
+                      launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                      if (stationId != null) launch.putExtra(MediaActionReceiver.EXTRA_STATION_ID, stationId);
+                      startActivity(launch);
+                  } catch (Throwable t) {
+                      Log.w(TAG, "Cannot launch app from background", t);
+                  }
+                  return false;
+              }
+
+              @Nullable
+              private String findStationIdForQuery(@Nullable String query) {
+                  JSONArray stations = loadStations();
+                  if (stations.length() == 0) return null;
+                  if (query == null || query.trim().isEmpty()) {
+                      // Empty query = "play Radio Room": resume most recent station
+                      JSONArray recents = loadRecents();
+                      if (recents.length() > 0) return recents.optJSONObject(0).optString("id", null);
+                      return stations.optJSONObject(0).optString("id", null);
+                  }
+                  String q = query.toLowerCase().replaceAll("[^\\p{L}\\p{N}]", "");
+                  for (int i = 0; i < stations.length(); i++) {
+                      JSONObject s = stations.optJSONObject(i);
+                      if (s == null) continue;
+                      String name = s.optString("name", "").toLowerCase().replaceAll("[^\\p{L}\\p{N}]", "");
+                      if (!name.isEmpty() && (name.contains(q) || q.contains(name))) return s.optString("id", null);
+                  }
+                  return null;
+              }
+
+              private JSONArray loadStations() {
+                  try {
+                      String json = getSharedPreferences(STATIONS_PREFS, Context.MODE_PRIVATE).getString(PREF_STATIONS, "[]");
+                      return new JSONArray(json);
+                  } catch (Throwable t) {
+                      return new JSONArray();
+                  }
+              }
+
+              private JSONArray loadRecents() {
+                  try {
+                      String json = getSharedPreferences("radioroom_widget_prefs", Context.MODE_PRIVATE).getString("recents_json", "[]");
+                      return new JSONArray(json);
+                  } catch (Throwable t) {
+                      return new JSONArray();
+                  }
+              }
+
+              // ---------- Android Auto browse tree ----------
+
+              @Nullable
+              @Override
+              public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
+                  Bundle extras = new Bundle();
+                  // Content style hints: show station lists as a grid of logos, categories as list
+                  extras.putBoolean("android.media.browse.CONTENT_STYLE_SUPPORTED", true);
+                  extras.putInt("android.media.browse.CONTENT_STYLE_BROWSABLE_HINT", 1);
+                  extras.putInt("android.media.browse.CONTENT_STYLE_PLAYABLE_HINT", 2);
+                  extras.putBoolean("android.media.browse.SEARCH_SUPPORTED", true);
+                  return new BrowserRoot(BROWSE_ROOT, extras);
+              }
+
+              @Override
+              public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+                  List<MediaBrowserCompat.MediaItem> items = new ArrayList<>();
+                  try {
+                      if (BROWSE_ROOT.equals(parentId)) {
+                          items.add(browsableItem(BROWSE_RECENT, "Recent", "Recently played stations"));
+                          items.add(browsableItem(BROWSE_THAI, "Thai Radio", "Stations from Thailand"));
+                          items.add(browsableItem(BROWSE_GLOBAL, "Global Radio", "Stations from around the world"));
+                      } else if (BROWSE_RECENT.equals(parentId)) {
+                          JSONArray recents = loadRecents();
+                          JSONArray stations = loadStations();
+                          for (int i = 0; i < recents.length(); i++) {
+                              JSONObject r = recents.optJSONObject(i);
+                              if (r == null) continue;
+                              String id = r.optString("id");
+                              JSONObject full = findById(stations, id);
+                              items.add(playableItem(id, r.optString("name", id), full != null ? full.optString("tagline", "") : ""));
+                          }
+                      } else if (BROWSE_THAI.equals(parentId) || BROWSE_GLOBAL.equals(parentId)) {
+                          String group = BROWSE_THAI.equals(parentId) ? "Thai" : "Global";
+                          JSONArray stations = loadStations();
+                          for (int i = 0; i < stations.length(); i++) {
+                              JSONObject s = stations.optJSONObject(i);
+                              if (s == null || !group.equals(s.optString("group"))) continue;
+                              items.add(playableItem(s.optString("id"), s.optString("name"), s.optString("tagline", "")));
+                          }
+                      }
+                  } catch (Throwable t) {
+                      Log.e(TAG, "onLoadChildren failed", t);
+                  }
+                  result.sendResult(items);
+              }
+
+              @Override
+              public void onSearch(@NonNull String query, Bundle extras, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+                  List<MediaBrowserCompat.MediaItem> items = new ArrayList<>();
+                  String q = query == null ? "" : query.toLowerCase().trim();
+                  JSONArray stations = loadStations();
+                  for (int i = 0; i < stations.length(); i++) {
+                      JSONObject s = stations.optJSONObject(i);
+                      if (s == null) continue;
+                      if (q.isEmpty() || s.optString("name").toLowerCase().contains(q)) {
+                          items.add(playableItem(s.optString("id"), s.optString("name"), s.optString("tagline", "")));
+                      }
+                  }
+                  result.sendResult(items);
+              }
+
+              @Nullable
+              private static JSONObject findById(JSONArray arr, String id) {
+                  for (int i = 0; i < arr.length(); i++) {
+                      JSONObject o = arr.optJSONObject(i);
+                      if (o != null && id.equals(o.optString("id"))) return o;
+                  }
+                  return null;
+              }
+
+              private MediaBrowserCompat.MediaItem browsableItem(String id, String title, String subtitle) {
+                  MediaDescriptionCompat desc = new MediaDescriptionCompat.Builder()
+                      .setMediaId(id).setTitle(title).setSubtitle(subtitle).build();
+                  return new MediaBrowserCompat.MediaItem(desc, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+              }
+
+              private MediaBrowserCompat.MediaItem playableItem(String id, String title, String subtitle) {
+                  MediaDescriptionCompat.Builder b = new MediaDescriptionCompat.Builder()
+                      .setMediaId(id).setTitle(title).setSubtitle(subtitle);
+                  Bitmap icon = loadStationIcon(id);
+                  if (icon != null) b.setIconBitmap(icon);
+                  return new MediaBrowserCompat.MediaItem(b.build(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
+              }
+
+              // Small (96px) PNG logos written by MainActivity.updateStations(); kept small so the
+              // browse result stays well under the 1MB Binder transaction limit
+              @Nullable
+              private Bitmap loadStationIcon(String id) {
+                  try {
+                      File f = new File(new File(getFilesDir(), "aa_icons"), id.replaceAll("[^A-Za-z0-9_-]", "_") + ".png");
+                      if (f.exists()) return BitmapFactory.decodeFile(f.getAbsolutePath());
                   } catch (Throwable t) {}
+                  return null;
+              }
+
+              // Called from MainActivity when the activity is destroyed so the notification never lingers
+              // (stopService() alone does not destroy a service that Android Auto is still bound to)
+              public static void stopFromApp() {
+                  final MediaNotificationService svc = instance;
+                  if (svc == null) return;
+                  svc.mainHandler.post(new Runnable() {
+                      @Override
+                      public void run() {
+                          svc.handleStop();
+                      }
+                  });
+              }
+
+              private void registerNoisyReceiver() {
+                  if (!isNoisyReceiverRegistered && becomingNoisyReceiver != null) {
+                      try {
+                          IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+                          if (Build.VERSION.SDK_INT >= 33) {
+                              registerReceiver(becomingNoisyReceiver, filter, Context.RECEIVER_EXPORTED);
+                          } else {
+                              registerReceiver(becomingNoisyReceiver, filter);
+                          }
+                          isNoisyReceiverRegistered = true;
+                      } catch (Throwable t) {}
+                  }
+                  registerAudioDeviceCallback();
+              }
+
+              private void unregisterNoisyReceiver() {
+                  if (isNoisyReceiverRegistered && becomingNoisyReceiver != null) {
+                      try {
+                          unregisterReceiver(becomingNoisyReceiver);
+                      } catch (Throwable t) {}
+                      isNoisyReceiverRegistered = false;
+                  }
+                  unregisterAudioDeviceCallback();
+              }
+
+              private void registerAudioDeviceCallback() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !isAudioDeviceCallbackRegistered) {
+                      try {
+                          audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                          if (audioManager != null) {
+                              if (audioDeviceCallback == null) {
+                                  audioDeviceCallback = new AudioDeviceCallback() {
+                                      @Override
+                                      public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
+                                          if (removedDevices != null) {
+                                              for (AudioDeviceInfo dev : removedDevices) {
+                                                  int t = dev.getType();
+                                                  if (t == AudioDeviceInfo.TYPE_USB_DEVICE || 
+                                                      t == AudioDeviceInfo.TYPE_USB_HEADSET || 
+                                                      t == AudioDeviceInfo.TYPE_WIRED_HEADSET || 
+                                                      t == AudioDeviceInfo.TYPE_WIRED_HEADPHONES || 
+                                                      t == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP) {
+                                                      interruptedByCall = false;
+                                                      isPlaying = false;
+                                                      updateMediaSessionState();
+                                                      triggerWeb(JS_STOP);
+                                                      break;
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  };
+                              }
+                              audioManager.registerAudioDeviceCallback(audioDeviceCallback, null);
+                              isAudioDeviceCallbackRegistered = true;
+                          }
+                      } catch (Throwable t) {}
+                  }
+              }
+
+              private void unregisterAudioDeviceCallback() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isAudioDeviceCallbackRegistered && audioManager != null && audioDeviceCallback != null) {
+                      try {
+                          audioManager.unregisterAudioDeviceCallback(audioDeviceCallback);
+                      } catch (Throwable t) {}
+                      isAudioDeviceCallbackRegistered = false;
+                  }
               }
 
               private void requestAudioFocus() {
+                  if (hasAudioFocus) return; // already holding it: don't spam requests on every metadata update
                   try {
-                      audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                      if (audioManager == null) audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                       if (audioManager != null) {
+                          int res;
                           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                              AudioAttributes playbackAttributes = new AudioAttributes.Builder()
-                                  .setUsage(AudioAttributes.USAGE_MEDIA)
-                                  .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                  .build();
-                              audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                                  .setAudioAttributes(playbackAttributes)
-                                  .setAcceptsDelayedFocusGain(true)
-                                  .setOnAudioFocusChangeListener(focusChange -> {})
-                                  .build();
-                              audioManager.requestAudioFocus(audioFocusRequest);
+                              if (audioFocusRequest == null) {
+                                  AudioAttributes playbackAttributes = new AudioAttributes.Builder()
+                                      .setUsage(AudioAttributes.USAGE_MEDIA)
+                                      .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                      .build();
+                                  audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                                      .setAudioAttributes(playbackAttributes)
+                                      .setAcceptsDelayedFocusGain(true)
+                                      // false = let the system duck us for nav prompts / notifications
+                                      // instead of us tearing down the live stream
+                                      .setWillPauseWhenDucked(false)
+                                      .setOnAudioFocusChangeListener(audioFocusChangeListener, mainHandler)
+                                      .build();
+                              }
+                              res = audioManager.requestAudioFocus(audioFocusRequest);
                           } else {
-                              audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+                              res = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
                           }
+                          hasAudioFocus = (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+                          Log.d(TAG, "requestAudioFocus result=" + res);
                       }
-                  } catch (Throwable t) {}
+                  } catch (Throwable t) {
+                      Log.e(TAG, "requestAudioFocus failed", t);
+                  }
               }
 
               private void abandonAudioFocus() {
+                  hasAudioFocus = false;
                   try {
                       if (audioManager != null) {
                           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && audioFocusRequest != null) {
                               audioManager.abandonAudioFocusRequest(audioFocusRequest);
                           } else {
-                              audioManager.abandonAudioFocus(null);
+                              audioManager.abandonAudioFocus(audioFocusChangeListener);
                           }
                       }
+                  } catch (Throwable t) {}
+              }
+
+              private void acquireWakeLock() {
+                  try {
+                      if (wakeLock != null && !wakeLock.isHeld()) wakeLock.acquire(12 * 60 * 60 * 1000L);
+                  } catch (Throwable t) {}
+              }
+
+              private void releaseWakeLock() {
+                  try {
+                      if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
+                  } catch (Throwable t) {}
+              }
+
+              private void handleStop() {
+                  isPlaying = false;
+                  interruptedByCall = false;
+                  stopModePolling();
+                  unregisterNoisyReceiver();
+                  currentArtworkBitmap = null;
+                  currentArtworkUrl = "";
+                  pendingArtworkUrl = "";
+                  abandonAudioFocus();
+                  releaseWakeLock();
+                  updateMediaSessionState();
+                  try {
+                      stopForeground(true);
+                      stopSelf();
                   } catch (Throwable t) {}
               }
 
@@ -274,7 +1311,12 @@ jobs:
                   try {
                       android.webkit.WebView webView = MainActivity.getAppWebView();
                       if (webView != null) {
-                          webView.post(() -> webView.evaluateJavascript(js, null));
+                          webView.post(new Runnable() {
+                              @Override
+                              public void run() {
+                                  webView.evaluateJavascript(js, null);
+                              }
+                          });
                       }
                   } catch (Throwable t) {}
               }
@@ -284,13 +1326,15 @@ jobs:
                   if (intent != null) {
                       String action = intent.getAction();
                       if (ACTION_START.equals(action) || ACTION_UPDATE.equals(action)) {
-                        if (ACTION_START.equals(action)) {
-                            requestAudioFocus();
-                        }
                           if (intent.hasExtra(EXTRA_TITLE)) currentTitle = intent.getStringExtra(EXTRA_TITLE);
                           if (intent.hasExtra(EXTRA_SUBTITLE)) currentSubtitle = intent.getStringExtra(EXTRA_SUBTITLE);
                           if (intent.hasExtra(EXTRA_IS_PLAYING)) isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true);
-                          
+                          // An "isPlaying=true" metadata update that was already queued when the call started
+                          // must not cancel the interruption
+                          if (isPlaying && interruptedByCall && System.currentTimeMillis() - interruptedAt < 2000) {
+                              isPlaying = false;
+                          }
+
                           // Read artwork from in-memory field to bypass Intent size limits
                           String newArt = pendingArtworkUrl;
                           if (newArt != null && !newArt.isEmpty() && !newArt.equals(currentArtworkUrl)) {
@@ -299,21 +1343,30 @@ jobs:
                           }
 
                           updateMediaSessionState();
+                          // Must become foreground BEFORE requesting focus: on Android 12+ a background
+                          // app without a foreground service can be refused audio focus.
                           try {
                               Notification notification = buildNotification();
                               startForeground(NOTIFICATION_ID, notification);
-                          } catch (Throwable t) {}
+                          } catch (Throwable t) {
+                              Log.e(TAG, "startForeground failed", t);
+                          }
+
+                          if (isPlaying) {
+                              interruptedByCall = false; // user (or resume) started playback again
+                              acquireWakeLock();
+                              requestAudioFocus();
+                              registerNoisyReceiver();
+                              startModePolling();
+                          } else if (!interruptedByCall) {
+                              // Real user pause/stop. While paused for a call we KEEP the focus request so
+                              // the system sends AUDIOFOCUS_GAIN when the call ends.
+                              unregisterNoisyReceiver();
+                              abandonAudioFocus();
+                              stopModePolling();
+                          }
                       } else if (ACTION_STOP.equals(action)) {
-                          isPlaying = false;
-                          currentArtworkBitmap = null;
-                          currentArtworkUrl = "";
-                          pendingArtworkUrl = "";
-                          abandonAudioFocus();
-                          updateMediaSessionState();
-                          try {
-                              stopForeground(true);
-                              stopSelf();
-                          } catch (Throwable t) {}
+                          handleStop();
                       }
                   }
                   return START_STICKY;
@@ -328,17 +1381,24 @@ jobs:
                                    | PlaybackStateCompat.ACTION_PLAY_PAUSE
                                    | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                                    | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                                   | PlaybackStateCompat.ACTION_STOP;
+                                   | PlaybackStateCompat.ACTION_STOP
+                                   | PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
+                                   | PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH;
 
                       PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                           .setActions(actions)
                           .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
                       mediaSession.setPlaybackState(stateBuilder.build());
 
+                      String albumName = "Radio Room";
+                      if (currentSubtitle != null && currentSubtitle.contains("\u2022")) {
+                          albumName = currentSubtitle.substring(currentSubtitle.indexOf("\u2022") + 1).trim();
+                      }
+
                       MediaMetadataCompat.Builder metaBuilder = new MediaMetadataCompat.Builder()
                           .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentTitle)
                           .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentSubtitle)
-                          .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "Radio Room")
+                          .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, albumName)
                           .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, currentTitle)
                           .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, currentSubtitle);
 
@@ -356,17 +1416,18 @@ jobs:
                       }
                       mediaSession.setMetadata(metaBuilder.build());
                   } catch (Throwable t) {}
+                  try {
+                      RadioRoomWidgetProvider.updatePlaybackState(this, currentTitle, currentSubtitle, isPlaying, currentArtworkBitmap);
+                  } catch (Throwable t) {}
               }
 
               private void loadArtwork(final String artUrl) {
                   if (artUrl == null || artUrl.trim().isEmpty()) return;
                   try {
-                      if (artUrl.startsWith("data:image")) {
-                          int commaIndex = artUrl.indexOf(",");
-                          if (commaIndex != -1) {
-                              String base64Str = artUrl.substring(commaIndex + 1);
-                              byte[] decodedBytes = android.util.Base64.decode(base64Str, android.util.Base64.DEFAULT);
-                              Bitmap bmp = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                      if (artUrl.startsWith("data:image") || AppImageLoader.isLocal(artUrl)) {
+                          // Bundled station logo (assets) or legacy data URI
+                          {
+                              Bitmap bmp = AppImageLoader.load(this, artUrl);
                               if (bmp != null) {
                                   currentArtworkBitmap = bmp;
                                   updateMediaSessionState();
@@ -480,27 +1541,28 @@ jobs:
 
               @Override
               public void onTaskRemoved(Intent rootIntent) {
-                  abandonAudioFocus();
+                  // The WebView (our player) dies with the task. Stop playback state & notification, but keep
+                  // the MediaSession alive: Android Auto may still be bound and would otherwise hold a dead
+                  // session. onDestroy() releases it once every client has unbound.
+                  handleStop();
                   try {
-                      if (mediaSession != null) {
-                          mediaSession.setActive(false);
-                          mediaSession.release();
-                      }
-                      if (wakeLock != null && wakeLock.isHeld()) {
-                          wakeLock.release();
-                      }
-                      stopForeground(true);
                       NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                       if (nm != null) {
                           nm.cancel(NOTIFICATION_ID);
                       }
                   } catch (Throwable t) {}
-                  stopSelf();
+                  try {
+                      RadioRoomWidgetProvider.updatePlaybackState(this, currentTitle, currentSubtitle, false, null);
+                  } catch (Throwable t) {}
                   super.onTaskRemoved(rootIntent);
               }
 
               @Override
               public void onDestroy() {
+                  isRunning = false;
+                  if (instance == this) instance = null;
+                  stopModePolling();
+                  unregisterNoisyReceiver();
                   abandonAudioFocus();
                   try {
                       if (mediaSession != null) {
@@ -516,13 +1578,12 @@ jobs:
                           nm.cancel(NOTIFICATION_ID);
                       }
                   } catch (Throwable t) {}
+                  try {
+                      RadioRoomWidgetProvider.updatePlaybackState(this, currentTitle, currentSubtitle, false, null);
+                  } catch (Throwable t) {}
                   super.onDestroy();
               }
-
-              @Override
-              public IBinder onBind(Intent intent) {
-                  return null;
-              }
+              // NOTE: do not override onBind(); MediaBrowserServiceCompat returns the browser binder Android Auto needs
           }
           EOF
 
@@ -537,10 +1598,32 @@ jobs:
           import android.webkit.WebView;
 
           public class MediaActionReceiver extends BroadcastReceiver {
+              public static final String ACTION_SELECT_STATION = "com.radioroom.app.SELECT_STATION";
+              public static final String EXTRA_STATION_ID = "extra_station_id";
+
               @Override
               public void onReceive(Context context, Intent intent) {
                   if (intent == null) return;
                   String action = intent.getAction();
+
+                  if (ACTION_SELECT_STATION.equals(action)) {
+                      String stationId = intent.getStringExtra(EXTRA_STATION_ID);
+                      if (stationId != null && !stationId.isEmpty()) {
+                          WebView webView = MainActivity.getAppWebView();
+                          if (webView != null) {
+                              webView.post(() -> webView.evaluateJavascript(
+                                  "if (typeof selectStationById === 'function') selectStationById('" + stationId + "', true);", null
+                              ));
+                          } else {
+                              Intent launchIntent = new Intent(context, MainActivity.class);
+                              launchIntent.putExtra(EXTRA_STATION_ID, stationId);
+                              launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                              context.startActivity(launchIntent);
+                          }
+                      }
+                      return;
+                  }
+
                   WebView webView = MainActivity.getAppWebView();
                   if (webView == null) return;
 
@@ -568,9 +1651,11 @@ jobs:
 
           import android.content.Context;
           import android.content.Intent;
+          import android.media.AudioManager;
           import android.os.Build;
           import android.os.Bundle;
           import android.os.PowerManager;
+          import android.view.KeyEvent;
           import android.webkit.JavascriptInterface;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
@@ -588,6 +1673,7 @@ jobs:
               @Override
               public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
+                  setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
                   if (Build.VERSION.SDK_INT >= 33) {
                       try {
@@ -607,6 +1693,7 @@ jobs:
 
                   WebView webView = this.bridge.getWebView();
                   staticWebView = webView;
+                    handleIntentForStation(getIntent());
 
                   if (webView != null) {
                       WebSettings settings = webView.getSettings();
@@ -614,10 +1701,13 @@ jobs:
                       settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
                       settings.setDomStorageEnabled(true);
                       settings.setDatabaseEnabled(true);
+                      settings.setAllowUniversalAccessFromFileURLs(true);
+                      settings.setAllowFileAccessFromFileURLs(true);
 
                       webView.addJavascriptInterface(new Object() {
                           @JavascriptInterface
                           public void updateMedia(final String title, final String subtitle, final boolean isPlaying, final String artworkUrl) {
+                              if (!isPlaying && !MediaNotificationService.isRunning) return;
                               try {
                                   MediaNotificationService.pendingArtworkUrl = (artworkUrl != null) ? artworkUrl : "";
                                   Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
@@ -633,10 +1723,92 @@ jobs:
                           public void stopMedia() {
                               try {
                                   MediaNotificationService.pendingArtworkUrl = "";
+                                  MediaNotificationService.stopFromApp();
                                   Intent serviceIntent = new Intent(MainActivity.this, MediaNotificationService.class);
                                   serviceIntent.setAction(MediaNotificationService.ACTION_STOP);
                                   stopService(serviceIntent);
                               } catch (Throwable t) {}
+                          }
+
+                          // Station catalogue for the Android Auto browse tree.
+                          // JSON: [{id,name,tagline,group,logo(data URI)}]. Logos are shrunk to 96px PNG files
+                          // so they never go through SharedPreferences or a Binder transaction at full size.
+                          @JavascriptInterface
+                          public void updateStations(final String stationsJson) {
+                              if (stationsJson == null) return;
+                              new Thread(() -> {
+                                  try {
+                                      org.json.JSONArray in = new org.json.JSONArray(stationsJson);
+                                      org.json.JSONArray slim = new org.json.JSONArray();
+                                      java.io.File dir = new java.io.File(getFilesDir(), "aa_icons");
+                                      if (!dir.exists()) dir.mkdirs();
+                                      for (int i = 0; i < in.length(); i++) {
+                                          org.json.JSONObject s = in.getJSONObject(i);
+                                          String id = s.optString("id");
+                                          if (id.isEmpty()) continue;
+                                          org.json.JSONObject o = new org.json.JSONObject();
+                                          o.put("id", id);
+                                          o.put("name", s.optString("name"));
+                                          o.put("tagline", s.optString("tagline"));
+                                          o.put("group", s.optString("group"));
+                                          slim.put(o);
+                                          String logo = s.optString("logo");
+                                          java.io.File f = new java.io.File(dir, id.replaceAll("[^A-Za-z0-9_-]", "_") + ".png");
+                                          if (!f.exists()) {
+                                              android.graphics.Bitmap bmp = AppImageLoader.load(MainActivity.this, logo);
+                                              if (bmp == null) continue;
+                                              android.graphics.Bitmap small = android.graphics.Bitmap.createScaledBitmap(bmp, 96, 96, true);
+                                              try (java.io.FileOutputStream out = new java.io.FileOutputStream(f)) {
+                                                  small.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+                                              }
+                                          }
+                                      }
+                                      getSharedPreferences(MediaNotificationService.STATIONS_PREFS, Context.MODE_PRIVATE)
+                                          .edit().putString(MediaNotificationService.PREF_STATIONS, slim.toString()).apply();
+                                  } catch (Throwable t) {}
+                              }).start();
+                          }
+
+                          @JavascriptInterface
+                          public void updateRecents(final String recentsJson) {
+                              if (recentsJson != null) {
+                                  try {
+                                      RadioRoomWidgetProvider.updateRecentsOnly(MainActivity.this, recentsJson);
+                                  } catch (Throwable t) {}
+                              }
+                          }
+
+                          @JavascriptInterface
+                          public String getTsfJazzNowPlaying() {
+                              try {
+                                  java.net.URL url = new java.net.URL("https://www.tsfjazz.com/player/qect");
+                                  java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                                  conn.setRequestMethod("POST");
+                                  conn.setDoOutput(true);
+                                  byte[] postBytes = "x=1".getBytes("UTF-8");
+                                  conn.setFixedLengthStreamingMode(postBytes.length);
+                                  conn.setConnectTimeout(6000);
+                                  conn.setReadTimeout(6000);
+                                  conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 10)");
+                                  conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                                  java.io.OutputStream out = conn.getOutputStream();
+                                  out.write(postBytes);
+                                  out.close();
+                                  java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), "UTF-8"));
+                                  StringBuilder sb = new StringBuilder();
+                                  String line;
+                                  while ((line = in.readLine()) != null) { sb.append(line); }
+                                  in.close();
+                                  conn.disconnect();
+                                  return sb.toString();
+                              } catch (Throwable t) {
+                                  return "";
+                              }
+                          }
+
+                          @JavascriptInterface
+                          public void fetchTsfJazzNowPlaying() {
+                              // Legacy no-op
                           }
                       }, "AndroidBridge");
                   }
@@ -692,7 +1864,33 @@ jobs:
               }
 
               @Override
+              protected void onNewIntent(Intent intent) {
+                  super.onNewIntent(intent);
+                  setIntent(intent);
+                  handleIntentForStation(intent);
+              }
+
+              private void handleIntentForStation(Intent intent) {
+                  if (intent != null && intent.hasExtra(MediaActionReceiver.EXTRA_STATION_ID)) {
+                      final String stationId = intent.getStringExtra(MediaActionReceiver.EXTRA_STATION_ID);
+                      if (stationId != null && !stationId.isEmpty()) {
+                          final WebView wv = getAppWebView();
+                          if (wv != null) {
+                              // Page may still be loading on a cold start (widget / Android Auto): retry for ~10s
+                              wv.postDelayed(() -> wv.evaluateJavascript(
+                                  "(function t(n){ if (typeof selectStationById === 'function') selectStationById(" + org.json.JSONObject.quote(stationId) + ", true); else if (n > 0) setTimeout(function(){ t(n - 1); }, 500); })(20);", null
+                              ), 500);
+                          }
+                      }
+                  }
+              }
+
+              @Override
               public void onDestroy() {
+                  staticWebView = null; // never let the service call into a destroyed WebView
+                  try {
+                      MediaNotificationService.stopFromApp();
+                  } catch (Throwable t) {}
                   try {
                       Intent serviceIntent = new Intent(this, MediaNotificationService.class);
                       serviceIntent.setAction(MediaNotificationService.ACTION_STOP);
