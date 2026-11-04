@@ -6,6 +6,11 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
+# Never run two updates (or an update and a push from another run) at the same time
+concurrency:
+  group: update-episodes
+  cancel-in-progress: false
+
 jobs:
   update-episodes:
     runs-on: ubuntu-latest
@@ -24,6 +29,8 @@ jobs:
       - name: Run YouTube Audio Scraper
         run: python scripts/update_ghost_episodes.py
 
+      # The app reads ghost_episodes.json (repo root) from GitHub; www/ghost_episodes.json is the copy bundled
+      # into the APK. Both are written by the script, so both are committed.
       - name: Commit and Push if Changed
         run: |
           git config --global user.name "github-actions[bot]"
@@ -33,5 +40,12 @@ jobs:
             echo "No changes in episodes list."
           else
             git commit -m "Auto-update YouTube Audio episodes (Ghost, Gun Gun, CloudSphere) [skip ci]"
-            git push
+            # main may have moved while the scraper ran (someone pushed): rebase on top, then push, retry a few times
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && exit 0
+              echo "Push attempt $i failed, retrying..."
+              sleep $((i * 5))
+            done
+            echo "Could not push after 3 attempts"
+            exit 1
           fi

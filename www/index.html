@@ -4739,15 +4739,72 @@ const GHOST_EPISODES = [
     playGhostEpisode(list[prevIdx]);
   }
 
-  function getFilteredGhostEpisodes() {
+  // Episodes of one channel + category. "This Month" / "Best of <year>" are re-checked against the real publish
+  // date every time, so an item ages out of them even if the JSON was scraped a while ago.
+  function episodesFor(chan, cat) {
     let list = window.ghostEpisodesList;
-    if (!list || !list.some(e => (e.channel || 'ghost') === currentYtChannel)) {
+    if (!list || !list.some(e => (e.channel || 'ghost') === chan)) {
       list = GHOST_EPISODES;
     }
-    return list.filter(ep => {
-      const epChan = ep.channel || 'ghost';
-      return epChan === currentYtChannel && ep.cat === currentGhostCat;
-    });
+    let out = list.filter(ep => (ep.channel || 'ghost') === chan && ep.cat === cat);
+    if (cat === 'monthly' || cat === 'yearly') {
+      const now = Date.now();
+      const year = new Date().getFullYear();
+      out = out.filter(ep => {
+        const t = Date.parse(ep.ts);
+        if (isNaN(t)) return true;
+        return cat === 'monthly' ? (now - t) <= 31 * 86400000 : new Date(t).getFullYear() === year;
+      });
+    }
+    return out;
+  }
+
+  function getFilteredGhostEpisodes() {
+    return episodesFor(currentYtChannel, currentGhostCat);
+  }
+
+  // "3 days ago" computed from the publish timestamp now, not frozen at scrape time
+  function formatAgo(ts) {
+    const t = Date.parse(ts);
+    if (isNaN(t)) return '';
+    const sec = Math.max(0, (Date.now() - t) / 1000);
+    const plural = (n, unit) => n + ' ' + unit + (n === 1 ? '' : 's') + ' ago';
+    if (sec < 3600) return plural(Math.max(1, Math.round(sec / 60)), 'min').replace('mins', 'min');
+    if (sec < 86400) return plural(Math.round(sec / 3600), 'hour');
+    const days = sec / 86400;
+    if (days < 7) return plural(Math.floor(days), 'day');
+    if (days < 30) return plural(Math.floor(days / 7), 'week');
+    if (days < 365) return plural(Math.floor(days / 30), 'month');
+    return plural(Math.floor(days / 365), 'year');
+  }
+
+  function formatViews(n) {
+    if (!(n > 0)) return '';
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M views';
+    if (n >= 1e4) return Math.round(n / 1e3) + 'K views';
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K views';
+    return n + ' views';
+  }
+
+  const EPISODE_TAB_LABELS = {
+    ghost: { latest: 'Latest', monthly: 'This Month', yearly: 'Best of ' + new Date().getFullYear(), alltime: 'Classic' },
+    gungun: { latest: 'Latest Mixes', popular: 'Popular' },
+    cloudsphere: { general: 'General', spooky: 'Spooky' }
+  };
+
+  // Tab labels show the real number of episodes instead of hard-coded counts
+  function updateEpisodeTabs() {
+    try {
+      const containers = { ghost: 'tabsGhost', gungun: 'tabsGungun', cloudsphere: 'tabsCloud' };
+      Object.keys(containers).forEach(chan => {
+        const el = document.getElementById(containers[chan]);
+        if (!el) return;
+        el.querySelectorAll('.ghost-tab-btn').forEach(btn => {
+          const label = EPISODE_TAB_LABELS[chan][btn.dataset.cat];
+          if (label) btn.textContent = label + ' (' + episodesFor(chan, btn.dataset.cat).length + ')';
+        });
+      });
+    } catch (e) {}
   }
 
   function toggleYtChannelExpand(chan) {
@@ -4801,6 +4858,7 @@ const GHOST_EPISODES = [
   }
 
   function renderGhostEpisodes() {
+    updateEpisodeTabs();
     const ch = expandedYtChannel || currentYtChannel;
     if (!ch) return;
     const grid = document.getElementById('ghostEpisodeGrid-' + ch);
@@ -4857,17 +4915,22 @@ const GHOST_EPISODES = [
       chanBadge.textContent = getChannelTitle(ep);
       badgesRow.appendChild(chanBadge);
 
-      if (ep.tag) {
+      const viewsText = formatViews(ep.views) || ep.tag;
+      if (viewsText) {
         const tagBadge = document.createElement('span');
         tagBadge.className = 'badge-genre';
-        tagBadge.textContent = ep.tag;
+        tagBadge.textContent = viewsText;
         badgesRow.appendChild(tagBadge);
       }
 
       const dateRow = document.createElement('div');
       dateRow.className = 'card-track';
-      const authorText = (ep.author && ep.author !== getChannelTitle(ep)) ? (ep.author + (ep.date ? ' - ' : '')) : '';
-      dateRow.textContent = authorText + (ep.date || 'Audio Stream');
+      const when = formatAgo(ep.ts) || ep.date || 'Audio Stream';
+      const authorText = (ep.author && ep.author !== getChannelTitle(ep)) ? (ep.author + ' - ') : '';
+      dateRow.textContent = authorText + when;
+      if (!isNaN(Date.parse(ep.ts))) {
+        dateRow.title = new Date(ep.ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
 
       meta.appendChild(nameRow);
       meta.appendChild(badgesRow);
