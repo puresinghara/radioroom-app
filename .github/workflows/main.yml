@@ -812,17 +812,29 @@ jobs:
                       Log.d(TAG, "onAudioFocusChange " + focusChange + " isPlaying=" + isPlaying);
                       switch (focusChange) {
                           case AudioManager.AUDIOFOCUS_LOSS:
-                              // Another media app took over permanently: behave like the user pressed stop
+                              // IMPORTANT: the WebView (Chromium) inside this very app also requests audio focus
+                              // when the <audio> element starts, which takes focus from us and lands here as a
+                              // permanent LOSS. Stopping on it makes the radio play for a split second and then
+                              // stop. So only react when it is really a call; ignore it otherwise and do NOT
+                              // re-request focus (that would steal it back and make the WebView pause again).
                               hasAudioFocus = false;
-                              interruptedByCall = false;
-                              isPlaying = false;
-                              updateMediaSessionState();
-                              triggerWeb(JS_STOP);
+                              if (isPlaying && isInCallMode()) {
+                                  pauseForInterruption(true);
+                              } else {
+                                  focusTakenByOthers = true;
+                                  Log.d(TAG, "Permanent focus loss ignored (not a call)");
+                              }
                               break;
                           case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                               // Incoming call ringtone, voice assistant, etc.
                               hasAudioFocus = false;
-                              if (isPlaying) pauseForInterruption();
+                              if (isPlaying) {
+                                  boolean call = isInCallMode();
+                                  // A transient loss right after our own request is noise from our own WebView
+                                  if (call || System.currentTimeMillis() - lastFocusRequestAt > 3000) {
+                                      pauseForInterruption(call);
+                                  }
+                              }
                               break;
                           case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                               // Navigation prompt / notification sound: lower volume instead of tearing down the stream.
@@ -864,10 +876,13 @@ jobs:
                       normalModeStreak = 0;
                       if (isPlaying && !interruptedByCall) {
                           Log.d(TAG, "Call detected via audio mode, pausing");
-                          pauseForInterruption();
+                          pauseForInterruption(true);
+                      } else if (interruptedByCall) {
+                          pausedByCallMode = true;
                       }
-                  } else if (interruptedByCall) {
-                      // Wait ~2s of normal mode so the in-call audio route has been torn down
+                  } else if (interruptedByCall && pausedByCallMode) {
+                      // Only calls resume from here (other interruptions resume on AUDIOFOCUS_GAIN).
+                      // Wait ~2s of normal mode so the in-call audio route has been torn down.
                       normalModeStreak++;
                       if (normalModeStreak >= 2) {
                           resumeAfterInterruption();
@@ -888,9 +903,13 @@ jobs:
               }
 
               private long interruptedAt = 0;
+              private long lastFocusRequestAt = 0;
+              private boolean focusTakenByOthers = false; // permanent loss ignored: don't fight for focus again
+              private boolean pausedByCallMode = false;
 
-              private void pauseForInterruption() {
+              private void pauseForInterruption(boolean byCallMode) {
                   interruptedByCall = true;
+                  pausedByCallMode = byCallMode;
                   interruptedAt = System.currentTimeMillis();
                   normalModeStreak = 0;
                   isPlaying = false;
@@ -1234,6 +1253,8 @@ jobs:
 
               private void requestAudioFocus() {
                   if (hasAudioFocus) return; // already holding it: don't spam requests on every metadata update
+                  if (focusTakenByOthers) return; // lost it permanently without a call: don't steal it back mid-playback
+                  lastFocusRequestAt = System.currentTimeMillis();
                   try {
                       if (audioManager == null) audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                       if (audioManager != null) {
@@ -1328,7 +1349,10 @@ jobs:
                       if (ACTION_START.equals(action) || ACTION_UPDATE.equals(action)) {
                           if (intent.hasExtra(EXTRA_TITLE)) currentTitle = intent.getStringExtra(EXTRA_TITLE);
                           if (intent.hasExtra(EXTRA_SUBTITLE)) currentSubtitle = intent.getStringExtra(EXTRA_SUBTITLE);
+                          boolean wasPlayingBefore = isPlaying;
                           if (intent.hasExtra(EXTRA_IS_PLAYING)) isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true);
+                          // A fresh play (not just a metadata refresh) may ask for focus again
+                          if (isPlaying && !wasPlayingBefore) focusTakenByOthers = false;
                           // An "isPlaying=true" metadata update that was already queued when the call started
                           // must not cancel the interruption
                           if (isPlaying && interruptedByCall && System.currentTimeMillis() - interruptedAt < 2000) {
