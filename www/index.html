@@ -4605,7 +4605,7 @@ const GHOST_EPISODES = [
         'onReady': () => {
           ytReady = true;
           const isGungunPlaying = (currentGhostEpisode && currentGhostEpisode.channel === 'gungun');
-      try { ytPlayer.setPlaybackQuality(isGungunPlaying ? 'hd720' : 'small'); } catch {}
+      try { ytPlayer.setPlaybackQuality(isGungunPlaying ? 'medium' : 'small'); } catch {}
         },
         'onStateChange': onYtStateChange,
         'onError': onYtError
@@ -4626,7 +4626,7 @@ const GHOST_EPISODES = [
       setStatus('playing');
       hideError();
       const isGungunPlaying = (currentGhostEpisode && currentGhostEpisode.channel === 'gungun');
-      try { ytPlayer.setPlaybackQuality(isGungunPlaying ? 'hd720' : 'small'); } catch {}
+      try { ytPlayer.setPlaybackQuality(isGungunPlaying ? 'medium' : 'small'); } catch {}
       updateYtTrackInfo();
       startProgressTracker();
     } else if (event.data === YT.PlayerState.ENDED) {
@@ -4736,7 +4736,7 @@ const GHOST_EPISODES = [
 
     if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
       try {
-        const quality = isGungun ? 'hd720' : 'small';
+        const quality = isGungun ? 'medium' : 'small';
         ytPlayer.loadVideoById({ videoId: ep.id, suggestedQuality: quality });
         ytPlayer.setPlaybackQuality(quality);
         ytPlayer.playVideo();
