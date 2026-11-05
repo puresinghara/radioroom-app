@@ -4527,6 +4527,16 @@ const GHOST_EPISODES = [
   let reconnectTimer = null;
   let currentGroup = 'All';
   let npTimer = null;
+  let npLoadNow = null;
+  let npLastKick = 0;
+  // Refresh the now-playing info right away when the app comes back to the foreground
+  // (visibilitychange is swallowed above, so use Capacitor's resume + window focus).
+  const npKick = () => {
+    const n = Date.now();
+    if (npLoadNow && n - npLastKick > 3000) { npLastKick = n; try { npLoadNow(); } catch (e) {} }
+  };
+  document.addEventListener('resume', npKick);
+  window.addEventListener('focus', npKick);
   let npAbort = null;
   const artworkCache = new Map();
 
@@ -5846,6 +5856,26 @@ const GHOST_EPISODES = [
     return '';
   }
 
+  // Non-blocking cover lookup: return the cached cover at once, otherwise return '' so the
+  // title shows immediately, then fill the cover in when iTunes answers.
+  const artPending = new Set();
+  async function findArtworkFast(artist, title, signal) {
+    const key = (artist + '|' + title).toLowerCase();
+    if (artworkCache.has(key)) return artworkCache.get(key);
+    if (!artPending.has(key)) {
+      artPending.add(key);
+      findArtwork(artist, title, signal).then(art => {
+        artPending.delete(key);
+        const t = currentTrackInfo;
+        if (art && t && t.title && t.artist && (t.title === title || t.artist === artist) &&
+            (!t.artwork || (selectedRadio && t.artwork === selectedRadio.logo)) && !isYtMode) {
+          renderNowPlayingBanner(Object.assign({}, t, { artwork: art }));
+        }
+      }).catch(() => { artPending.delete(key); });
+    }
+    return '';
+  }
+
   async function fetchKcrw(signal) {
     const r = await fetch('https://tracklist-api.kcrw.com/latest-playlist?show_title=Eclectic24', { cache: 'no-store', signal });
     if (!r.ok) throw Error();
@@ -5885,7 +5915,7 @@ const GHOST_EPISODES = [
           const artist = s.artist ? s.artist.trim() : '';
           const album = s.album ? s.album.trim() : '';
           let artwork = s.albumArt || '';
-          if (!artwork && artist && title) artwork = await findArtwork(artist, title, signal);
+          if (!artwork && artist && title) artwork = await findArtworkFast(artist, title, signal);
           return { title, artist, album, artwork };
         }
       }
@@ -5897,7 +5927,7 @@ const GHOST_EPISODES = [
     if (!s) throw Error();
     const val = n => s.querySelector(n) ? s.querySelector(n).textContent.trim() : '';
     const track = { title: val('title'), artist: val('artist'), album: val('album'), artwork: val('albumart') };
-    if (!track.artwork && track.artist && track.title) track.artwork = await findArtwork(track.artist, track.title, signal);
+    if (!track.artwork && track.artist && track.title) track.artwork = await findArtworkFast(track.artist, track.title, signal);
     return track;
   }
 
@@ -5943,7 +5973,7 @@ const GHOST_EPISODES = [
             const title = (ns.song || '').trim() || 'COOLISM Live';
             const artist = (ns.artist || '').trim() || 'COOL Fahrenheit 93';
             let artwork = ns.thumbAlbum || '';
-            if (!artwork && artist && title) artwork = await findArtwork(artist, title, signal);
+            if (!artwork && artist && title) artwork = await findArtworkFast(artist, title, signal);
             return { title, artist, artwork };
           }
         }
@@ -5962,7 +5992,7 @@ const GHOST_EPISODES = [
           const title = cur.title.trim();
           const artist = Array.isArray(cur.artist) ? cur.artist.join(', ') : (cur.artist || 'Jazz24 - KNKX');
           const album = cur.album || '';
-          let artwork = await findArtwork(artist, title, signal);
+          let artwork = await findArtworkFast(artist, title, signal);
           return { title, artist, album, artwork };
         }
       }
@@ -5988,7 +6018,7 @@ const GHOST_EPISODES = [
         }
         let artwork = data.iImg || '';
         if (!artwork && artist && title) {
-          artwork = await findArtwork(artist, title, signal);
+          artwork = await findArtworkFast(artist, title, signal);
         }
         if (title) {
           return { title, artist: artist || 'Japan City Pop', artwork };
@@ -6003,7 +6033,7 @@ const GHOST_EPISODES = [
 
   async function fetchAtimeNowPlaying(stationId, fallbackName, signal) {
     try {
-      if (!atimeCache || (Date.now() - atimeCacheTime) > 12000) {
+      if (!atimeCache || (Date.now() - atimeCacheTime) > 5000) {
         const r = await fetch('https://onair.atime.live/nowplaying', { cache: 'no-store', signal });
         if (r.ok) {
           atimeCache = await r.json();
@@ -6017,7 +6047,7 @@ const GHOST_EPISODES = [
           const artist = (item.artists || '').trim();
           let artwork = (item.cover && !item.cover.includes('fungfin-1')) ? item.cover : '';
           if (!artwork && (artist || title)) {
-            artwork = await findArtwork(artist, title, signal);
+            artwork = await findArtworkFast(artist, title, signal);
           }
           if (title) {
             return { title, artist: artist || fallbackName, artwork };
@@ -6084,7 +6114,7 @@ const GHOST_EPISODES = [
     let artwork = '';
     if (artist && title && artist !== 'Worldwide FM') {
       try {
-        artwork = await findArtwork(artist, title, signal);
+        artwork = await findArtworkFast(artist, title, signal);
       } catch {}
     }
     return { title, artist: artist || 'Worldwide FM', album: '', artwork };
@@ -6184,7 +6214,7 @@ const GHOST_EPISODES = [
       // Prefer TSF's real cover; fall back to an iTunes lookup, then the station logo
       let artwork = tsfCoverUrl(data.current.cover);
       if (!artwork && artist && title) {
-        try { artwork = await findArtwork(artist, title, signal); } catch(e) {}
+        try { artwork = await findArtworkFast(artist, title, signal); } catch(e) {}
       }
       return {
         title: title || 'TSF Jazz',
@@ -6203,7 +6233,7 @@ const GHOST_EPISODES = [
           let title = parts.length > 1 ? parts.slice(1).join(' - ').trim() : parts[0].trim();
           let artwork = '';
           if (artist && title) {
-            try { artwork = await findArtwork(artist, title, signal); } catch(e) {}
+            try { artwork = await findArtworkFast(artist, title, signal); } catch(e) {}
           }
           return { title, artist, album: 'TSF Jazz', artwork: artwork || (selectedRadio ? selectedRadio.logo : '') };
         }
@@ -6337,7 +6367,8 @@ const GHOST_EPISODES = [
     };
 
     load();
-    npTimer = setInterval(load, 35000);
+    npLoadNow = load;
+    npTimer = setInterval(load, 15000);
   }
 
   // Bottom Player Controls
