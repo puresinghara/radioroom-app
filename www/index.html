@@ -2670,9 +2670,14 @@
       background: var(--glass) !important;
       border: 1px solid var(--glass-bd) !important;
       border-radius: 22px !important;
-      -webkit-backdrop-filter: var(--glass-blur);
-      backdrop-filter: var(--glass-blur);
       box-shadow: none !important;
+    }
+    /* No backdrop-filter on the many list cards: dozens of blur layers made HyperOS WebView
+       draw grey boxes while scrolling. Frosted look comes from the translucent fill only. */
+    .station-card {
+      background: rgba(255, 255, 255, 0.09) !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
     }
     .station-card.active, .station-card.playing {
       background: var(--glass-strong) !important;
