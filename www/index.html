@@ -5930,24 +5930,37 @@ const GHOST_EPISODES = [
   // The Current has no public API and no CORS: read the newest play from its playlist page via native HTTP
   async function fetchTheCurrent(signal) {
     const url = 'https://www.thecurrent.org/playlist/the-current';
-    let html = '';
-    const capHttp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
-    if (capHttp && capHttp.request) {
-      const res = await capHttp.request({ url, method: 'GET', responseType: 'text' });
-      if (res && res.status === 200) html = typeof res.data === 'string' ? res.data : '';
-    } else {
-      const r = await fetch(url, { cache: 'no-store', signal });
-      if (r.ok) html = await r.text();
+    const parse = raw => {
+      if (!raw) return null;
+      const html = String(raw).replace(/\\"/g, '"');
+      const i = html.indexOf('"song":{"song_id"');
+      if (i < 0) return null;
+      const seg = html.slice(i, i + 2500);
+      const f = k => { const m = seg.match(new RegExp('"' + k + '":"([^"]*)"')); return m ? m[1] : ''; };
+      const title = f('title'), artist = f('artist');
+      if (!title || !artist) return null;
+      return { title, artist, album: f('album'), artwork: f('art_url') };
+    };
+    let t = null;
+    // 1) our own native bridge (HttpURLConnection, no CORS)
+    if (window.AndroidBridge && window.AndroidBridge.getTheCurrentNowPlaying) {
+      try { t = parse(window.AndroidBridge.getTheCurrentNowPlaying()); } catch (e) {}
+      if (t) return t;
     }
-    if (!html) throw Error();
-    html = html.replace(/\\"/g, '"');
-    const i = html.indexOf('"song":{"song_id"');
-    if (i < 0) throw Error();
-    const seg = html.slice(i, i + 2500);
-    const f = k => { const m = seg.match(new RegExp('"' + k + '":"([^"]*)"')); return m ? m[1] : ''; };
-    const title = f('title'), artist = f('artist');
-    if (!title || !artist) throw Error();
-    return { title, artist, album: f('album'), artwork: f('art_url') };
+    // 2) Capacitor native HTTP
+    try {
+      const capHttp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
+      if (capHttp && capHttp.request) {
+        const res = await capHttp.request({ url, method: 'GET', responseType: 'text' });
+        if (res && res.status === 200) t = parse(typeof res.data === 'string' ? res.data : JSON.stringify(res.data));
+        if (t) return t;
+      }
+    } catch (e) {}
+    // 3) plain fetch (desktop browser only; blocked by CORS in the WebView)
+    const r = await fetch(url, { cache: 'no-store', signal });
+    if (r.ok) t = parse(await r.text());
+    if (!t) throw Error();
+    return t;
   }
 
   async function fetchSoma(signal) {
