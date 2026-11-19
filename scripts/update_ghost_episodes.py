@@ -196,6 +196,28 @@ def post_json(url, payload, tries=3):
     return None
 
 
+MIN_EPISODE_SEC = 180
+
+
+def parse_duration_sec(text):
+    """Parse YouTube duration badge text like '1:21' or '2:27:29' into seconds, else None."""
+    s = (text or '').strip()
+    if not re.fullmatch(r'\d+(?::\d{1,2}){1,2}', s):
+        return None
+    parts = [int(p) for p in s.split(':')]
+    total = 0
+    for p in parts:
+        total = total * 60 + p
+    return total
+
+
+def is_short_video(raw_title, duration_text='', is_shorts_badge=False):
+    if is_shorts_badge or '#shorts' in (raw_title or '').lower():
+        return True
+    dur = parse_duration_sec(duration_text)
+    return dur is not None and dur < MIN_EPISODE_SEC
+
+
 def web_context(version='2.20261026.01.00'):
     return {'client': {'clientName': 'WEB', 'clientVersion': version, 'hl': 'th', 'gl': 'TH'}}
 
@@ -214,13 +236,19 @@ def browse_lockups(browse_id, version='2.20261026.01.00'):
         if not lvm:
             continue
         vid = lvm.get('contentId')
-        if not vid and 'contentImage' in lvm:
+        dur_text = ''
+        is_shorts_badge = False
+        if 'contentImage' in lvm:
             for ov in lvm['contentImage'].get('thumbnailViewModel', {}).get('overlays', []):
                 for b in ov.get('thumbnailBottomOverlayViewModel', {}).get('badges', []):
-                    target = b.get('thumbnailBadgeViewModel', {}).get('animationActivationTargetId')
-                    if target:
-                        vid = target
-                        break
+                    tb = b.get('thumbnailBadgeViewModel', {})
+                    if not vid and tb.get('animationActivationTargetId'):
+                        vid = tb.get('animationActivationTargetId')
+                    if tb.get('badgeStyle') == 'THUMBNAIL_OVERLAY_BADGE_STYLE_SHORTS':
+                        is_shorts_badge = True
+                    txt = (tb.get('text') or '').strip()
+                    if txt and not dur_text:
+                        dur_text = txt
         meta = lvm.get('metadata', {}).get('lockupMetadataViewModel', {})
         raw_title = meta.get('title', {}).get('content', '')
         views = ''
@@ -232,7 +260,7 @@ def browse_lockups(browse_id, version='2.20261026.01.00'):
                 views = parts[0].get('text', {}).get('content', '')
             if len(parts) >= 2:
                 published = parts[1].get('text', {}).get('content', '')
-        if vid and raw_title:
+        if vid and raw_title and not is_short_video(raw_title, dur_text, is_shorts_badge):
             out.append({'id': vid, 'raw_title': raw_title, 'views_text': views, 'published': published})
     return out
 
@@ -288,7 +316,8 @@ def search_videos(query):
                 continue
             vid = vr.get('videoId')
             raw_title = vr.get('title', {}).get('runs', [{}])[0].get('text', '')
-            if vid and raw_title:
+            dur_text = vr.get('lengthText', {}).get('simpleText', '')
+            if vid and raw_title and not is_short_video(raw_title, dur_text):
                 out.append({
                     'id': vid,
                     'raw_title': raw_title,
